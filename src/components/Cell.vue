@@ -1,7 +1,6 @@
 <template lang="pug">
 .cell-component.flex.center(:class="`-color-${data.color}`")
-  div {{ data.name }}
-  .index {{ data.id }}
+  // div {{ data.name }}
 </template>
 
 <script lang="ts">
@@ -26,10 +25,8 @@ export default defineComponent({
 <style lang="scss" scoped>
   .cell-component {
     width: 12.5%;
-
-    .index {
-      font-size: .5em;
-    }
+    cursor: default;
+    user-select: none;
 
     &.-color {
       &-white {

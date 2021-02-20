@@ -1,5 +1,11 @@
 <template lang="pug">
 .desk-component.flex.wrap
+  .labels
+    .flex.column.j-around
+      div(v-for="number in 8" :key="number") {{ 9 - number }}
+    .flex.a-center.j-around
+      div(v-for="letter in letters" :key="letter") {{ letter }}
+
   CellComponent(
     v-for="cell in desk"
     :data="cell"
@@ -19,6 +25,7 @@ export default defineComponent({
 
   data () {
     return {
+      letters: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
       desk: [],
       generator: {
         reverse: false
@@ -28,15 +35,6 @@ export default defineComponent({
 
   created () {
     this.generateDeck()
-  },
-
-  mounted () {
-    this.watchSize()
-    window.addEventListener('resize', this.watchSize)
-  },
-
-  beforeUnmount () {
-    window.removeEventListener('resize', this.watchSize)
   },
 
   methods: {
@@ -56,6 +54,8 @@ export default defineComponent({
         })
       })
       this.desk = desk
+      this.$store.dispatch('generateDeck')
+      console.log('desk', desk)
     },
 
     cellColor (i) {
@@ -66,20 +66,6 @@ export default defineComponent({
       return this.generator.reverse
         ? i % 2 ? 'white' : 'dark'
         : i % 2 ? 'dark' : 'white'
-    },
-
-    watchSize (): void {
-      this.$nextTick(() => {
-        const orientation = window.innerWidth < window.innerHeight ? 'vertical' : 'horizontal'
-        switch (orientation) {
-          case 'horizontal':
-            this.$el.style.width = `${this.$el.offsetHeight}px`
-            break
-          case 'vertical':
-            this.$el.style.height = `${this.$el.offsetWidth}px`
-            break
-        }
-      })
     }
   }
 })
@@ -89,6 +75,32 @@ export default defineComponent({
   .desk-component {
     margin: 0 auto;
     background: #f1f1f1;
+    width: 100%;
     height: 100%;
+
+    .labels {
+      position: absolute;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+
+      & > div {
+        font-weight: $font-weight-semibold;
+
+        &:first-child {
+          width: auto;
+          height: 100%;
+          transform: translate(-8%, 0);
+          font-size: 1.2rem;
+        }
+
+        &:last-child {
+          display: flex;
+          width: 100%;
+          font-size: 1.2rem;
+          transform: translate(0, 50%);
+        }
+      }
+    }
   }
 </style>
