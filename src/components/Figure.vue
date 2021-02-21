@@ -1,11 +1,21 @@
 <template lang="pug">
-.figure-component.flex.center(:data-name="data.name" :style="cellPosition")
+.figure-component.flex.center(
+  :data-name="data.name"
+  :class="classList"
+  :style="cellPosition"
+  @click="toggleMode")
   img(:src="require(`@/assets/svg/figures/${data.id}-${data.color}.svg`)")
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import { Figure } from '@/types/Figure'
+
+enum FigureMode {
+  Default = 'default',
+  ChoosingMove = 'choosing-move',
+  Moving = 'moving'
+}
 
 export default defineComponent({
   name: 'FigureComponent',
@@ -14,25 +24,57 @@ export default defineComponent({
     data: Object as PropType<Figure>
   },
 
+  data () {
+    return {
+      mode: 'default' as FigureMode
+    }
+  },
+
   computed: {
-    cellPosition () {
+    classList (): string {
+      return `-mode-${this.mode}`
+    },
+
+    cellPosition (): object {
       return this.$store.getters.cellPosition(this.data.cell) || {}
     }
   },
 
+  watch: {
+    mode (mode) {
+      if (mode === FigureMode.ChoosingMove) {
+        this.showAvailableMoves()
+      } else {
+        this.hideAvailableMoves()
+      }
+    }
+  },
+
   mounted () {
-    // console.log('cellPosition', this.cellPosition)
+    console.log('figure', this.data)
   },
 
   methods: {
-    getCellPosition (cell) {
-      return this.$store.getters.cellPosition(cell)
-      // console.log('[getCellPosition] cell', cell)
-      // const storedCell = this.$store.getters.cell({ name: cell })
-      // console.log('storedCell', storedCell)
-      // const top = storedCell.name.slice(1)
-      // console.log('top', top)
-      // return 'top: 0; left: 0'
+    toggleMode (): void {
+      switch (this.mode) {
+        case 'default':
+          this.mode = FigureMode.ChoosingMove
+          break
+        default:
+          this.mode = FigureMode.Default
+          break
+      }
+    },
+
+    showAvailableMoves (): void {
+      const availableCells = this.data.getAvailableMoves(this.data.cell)
+      console.log('available cells:', availableCells)
+      this.$store.dispatch('setHighlightedCells', availableCells)
+    },
+
+    hideAvailableMoves (): void {
+      console.log('hideAvailableMoves')
+      this.$store.dispatch('setHighlightedCells', [])
     }
   }
 })
@@ -47,10 +89,16 @@ export default defineComponent({
     user-select: none;
     cursor: pointer;
     padding: 2%;
-    background: rgba(red, .2);
+    transition: $transition-figure;
 
     img {
       display: block;
+    }
+
+    &.-mode {
+      &-choosing-move {
+        background: $color-cell-highlighted;
+      }
     }
   }
 </style>

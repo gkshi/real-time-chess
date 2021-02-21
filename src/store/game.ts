@@ -1,4 +1,6 @@
 export default {
+  namespaced: true,
+
   state: {
     timeout: null,
     timer: 0

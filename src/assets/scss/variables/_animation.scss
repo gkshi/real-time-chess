@@ -3,3 +3,4 @@ $transition-default-time: .2s;
 $transition-default-function: ease;
 
 $transition-default: all $transition-default-time $transition-default-function;
+$transition-figure: top .5s linear, left .5s linear, background $transition-default-time $transition-default-function;

@@ -78,6 +78,17 @@ export default defineComponent({
     width: 100%;
     height: 100%;
 
+    &:after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      z-index: -1;
+      width: calc(100% + 4px);
+      height: calc(100% + 4px);
+      background: $color-cell-dark;
+    }
+
     .labels {
       position: absolute;
       z-index: 0;

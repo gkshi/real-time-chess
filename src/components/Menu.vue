@@ -19,7 +19,8 @@ export default defineComponent({
 
   methods: {
     reset () {
-      this.$store.dispatch('resetGame')
+      console.log('this.$store', this.$store)
+      this.$store.dispatch('game/reset')
     }
   }
 })

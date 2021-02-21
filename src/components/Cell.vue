@@ -1,5 +1,5 @@
 <template lang="pug">
-.cell-component.flex.center(:class="`-color-${data.color}`")
+.cell-component.flex.center(:class="classList")
   // div {{ data.name }}
 </template>
 
@@ -16,8 +16,19 @@ export default defineComponent({
     index: Number
   },
 
-  data () {
-    return {}
+  computed: {
+    classList () {
+      return [
+        `-color-${this.data.color}`,
+        {
+          '-highlighted': this.isHighlighted
+        }
+      ]
+    },
+
+    isHighlighted () {
+      return this.$store.state.highlightedCells.includes(this.data.name)
+    }
   }
 })
 </script>
@@ -35,6 +46,19 @@ export default defineComponent({
       &-dark {
         background: $color-cell-dark;
         color: $color-text-light;
+      }
+    }
+
+    &.-highlighted {
+      background: $color-cell-highlighted;
+      cursor: pointer;
+
+      &:before {
+        content: '';
+        position: absolute;
+        z-index: 3;
+        width: 12.5%;
+        height: 12.5%;
       }
     }
   }

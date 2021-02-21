@@ -1,6 +1,6 @@
 import { createStore } from 'vuex'
 import { Cell, CellColor } from '@/types/Cell'
-import { Figure } from '@/types/Figure'
+import { Figure, FigureConstructor } from '@/types/Figure'
 import config from '@/config'
 
 import gameModule from './game'
@@ -9,6 +9,7 @@ export default createStore({
   state: {
     desk: [],
     figures: [],
+    highlightedCells: [],
     _generator: {
       reverse: false
     }
@@ -16,13 +17,13 @@ export default createStore({
 
   actions: {
     async init ({ commit, dispatch }) {
-      console.log('[store] init')
+      console.log('[store][init]')
       const figures = await dispatch('_generateFigures')
-      console.log('figures', figures)
       commit('FIGURES_UPDATE', figures)
     },
 
     async generateDeck ({ commit, dispatch }) {
+      console.log('[store][generateDeck]')
       const rows = ['8', '7', '6', '5', '4', '3', '2', '1']
       const cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
       const desk = []
@@ -53,7 +54,7 @@ export default createStore({
     _generateFigures (): Figure[] {
       const figures = []
       Object.keys(config.deck).forEach(cell => {
-        const figure = new Figure({
+        const figure = FigureConstructor[config.deck[cell].figure]({
           id: config.deck[cell].figure,
           color: config.deck[cell].color,
           cell
@@ -61,6 +62,10 @@ export default createStore({
         figures.push(figure)
       })
       return figures
+    },
+
+    setHighlightedCells ({ commit }, cells) {
+      commit('HIGHLIGHTED_CELLS_UPDATE', cells)
     }
   },
 
@@ -71,6 +76,10 @@ export default createStore({
 
     DESK_UPDATE (state, desk) {
       state.desk = desk
+    },
+
+    HIGHLIGHTED_CELLS_UPDATE (state, cells) {
+      state.highlightedCells = cells
     }
   },
 

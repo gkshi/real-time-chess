@@ -1,9 +1,9 @@
 <template lang="pug">
 .figures-component
   FigureComponent(
-    v-for="figure in figures"
+    v-for="(figure, i) in figures"
     :data="figure"
-    :key="figure.id")
+    :key="`${figure.id}-${i}`")
 </template>
 
 <script lang="ts">
