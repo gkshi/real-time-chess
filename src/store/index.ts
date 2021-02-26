@@ -1,4 +1,5 @@
 import { createStore } from 'vuex'
+import { storePlugin } from '@/plugins/store'
 import { Cell, CellColor } from '@/types/Cell'
 import { Figure, FigureConstructor } from '@/types/Figure'
 import config from '@/config'
@@ -11,7 +12,9 @@ export default createStore({
     figures: [],
     highlightedCells: [],
     _generator: {
-      reverse: false
+      reverse: false,
+      rows: ['8', '7', '6', '5', '4', '3', '2', '1'],
+      cols: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
     }
   },
 
@@ -22,17 +25,15 @@ export default createStore({
       commit('FIGURES_UPDATE', figures)
     },
 
-    async generateDeck ({ commit, dispatch }) {
+    async generateDeck ({ commit, dispatch, state }) {
       console.log('[store][generateDeck]')
-      const rows = ['8', '7', '6', '5', '4', '3', '2', '1']
-      const cols = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
       const desk = []
       let i = 0
-      for (let j = 0; j < rows.length; j++) {
-        for (let k = 0; k < cols.length; k++) {
+      for (let j = 0; j < state._generator.rows.length; j++) {
+        for (let k = 0; k < state._generator.cols.length; k++) {
           desk.push(new Cell({
             id: i,
-            name: `${cols[k]}${rows[j]}`,
+            name: `${state._generator.cols[k]}${state._generator.rows[j]}`,
             color: await dispatch('_cellColor', i)
           }))
           i++
@@ -57,6 +58,7 @@ export default createStore({
         const figure = FigureConstructor[config.deck[cell].figure]({
           id: config.deck[cell].figure,
           color: config.deck[cell].color,
+          $store: this,
           cell
         })
         figures.push(figure)
@@ -142,10 +144,18 @@ export default createStore({
         top: `${top}%`,
         left: `${left}%`
       }
-    }
+    },
+
+    maxCellNumber: (state) => state._generator.rows.length,
+
+    filledCells: state => state.figures.map(i => i.cell)
   },
 
   modules: {
     game: gameModule
-  }
+  },
+
+  plugins: [
+    storePlugin
+  ]
 })

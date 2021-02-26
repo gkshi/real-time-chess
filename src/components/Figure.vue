@@ -1,6 +1,6 @@
 <template lang="pug">
 .figure-component.flex.center(
-  :data-name="data.name"
+  :data-id="data.id"
   :class="classList"
   :style="cellPosition"
   @click="toggleMode")
@@ -48,10 +48,6 @@ export default defineComponent({
         this.hideAvailableMoves()
       }
     }
-  },
-
-  mounted () {
-    console.log('figure', this.data)
   },
 
   methods: {
