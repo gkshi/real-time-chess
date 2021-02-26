@@ -10,8 +10,11 @@ export default {
   },
 
   actions: {
-    start ({ commit }) {
-      commit('TIMEOUT_START')
+    start ({ commit, getters }) {
+      if (!getters.started) {
+        console.log('<! start')
+        commit('TIMEOUT_START')
+      }
     },
 
     reset ({ commit, dispatch }) {
@@ -53,6 +56,7 @@ export default {
 
     TIMEOUT_RESET (state) {
       clearInterval(state.interval)
+      state.interval = null
       state.timer = 0
     },
 
@@ -65,7 +69,7 @@ export default {
   },
 
   getters: {
-    started: (state): boolean => !!state.timer,
+    started: (state): boolean => !!state.interval,
     inRollback: state => figureId => state.rollbacks.includes(figureId)
   }
 }

@@ -57,7 +57,6 @@ export default defineComponent({
     }
 
     &.-highlighted {
-      background: $color-cell-highlighted;
       cursor: pointer;
 
       &:before {
@@ -66,6 +65,7 @@ export default defineComponent({
         z-index: 3;
         width: 12.5%;
         height: 12.5%;
+        background: $color-cell-highlighted;
       }
     }
   }

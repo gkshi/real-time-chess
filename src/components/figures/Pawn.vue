@@ -23,24 +23,40 @@ export default defineComponent({
     data: Object as PropType<Figure>
   },
 
+  data () {
+    return {
+      moves: 0
+    }
+  },
+
+  mounted () {
+    this.$emitter.on('figure-started-moving', this.onFigureStartedMoving)
+  },
+
   methods: {
     getAvailableMoves (): CellValue[] {
       const cell = this.data.cell
       console.log('[Pawn][getAvailableMoves] from cell', cell)
 
       const availableMoves = []
-      const isFirstTurn = !this.turns
-      const filledCells = this.$store.getters.filledCells
+      const isFirstMove = !this.moves
+      // const filledCells = this.$store.getters.filledCells
       switch (this.data.color) {
         case 'white':
-          availableMoves.push(`${cell.letter}${isFirstTurn ? cell.number + 2 : cell.number + 1}`)
+          availableMoves.push(`${cell.letter}${cell.number + 1}`)
+          if (isFirstMove) {
+            availableMoves.push(`${cell.letter}${cell.number + 2}`)
+          }
           break
         case 'dark':
-          availableMoves.push(`${cell.letter}${isFirstTurn ? cell.number - 2 : cell.number - 1}`)
+          availableMoves.push(`${cell.letter}${cell.number - 1}`)
+          if (isFirstMove) {
+            availableMoves.push(`${cell.letter}${cell.number - 2}`)
+          }
           break
       }
       // console.log('availableMoves', availableMoves)
-      this.turns++
+      // this.moves++
       return availableMoves
     },
 
@@ -48,11 +64,10 @@ export default defineComponent({
       // console.log('custom pawn onClick')
     },
 
-    onShowAvailableMoves () {
-      // console.log('onShowAvailableMoves')
-      // const availableCells = this.getAvailableMoves()
-      // console.log('available cells:', availableCells)
-      // this.$store.dispatch('setHighlightedCells', availableCells)
+    onFigureStartedMoving (payload) {
+      if (this.data.id === payload) {
+        this.moves++
+      }
     }
   }
 })

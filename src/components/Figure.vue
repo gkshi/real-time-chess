@@ -61,51 +61,33 @@ export default defineComponent({
       return this.$store.getters['game/inRollback'](this.data.id)
     },
 
-    rollbackPercent () {
-      // console.log('---')
+    rollbackPercent (): number {
       const percent = config.rollbackTime / 100
-      // console.log('percent', percent)
-      // console.log('this.rollbackTimer', this.rollbackTimer)
-      const res = (config.rollbackTime - this.rollbackTimer) / percent
-      // console.log('res', res)
-      return res
+      return (config.rollbackTime - this.rollbackTimer) / percent
     }
   },
 
   watch: {
-    mode (mode) {
-      // switch (mode) {
-      //   case FigureMode.Default:
-      //     console.log('запускаем откат')
-      //     this.$store.dispatch('game/setRollback', this.data.id)
-      //     break
-      //   case FigureMode.ChoosingMove:
-      //     this.showAvailableMoves()
-      //     break
-      //   default:
-      //     this.hideAvailableMoves()
-      //     break
-      // }
-      if (mode === FigureMode.ChoosingMove) {
-        this.showAvailableMoves()
-      } else {
-        this.hideAvailableMoves()
-      }
-    },
+    // mode (mode) {
+    //   if (mode === FigureMode.ChoosingMove) {
+    //     this.showAvailableMoves()
+    //   } else {
+    //     this.hideAvailableMoves()
+    //   }
+    // },
 
     'data.cell': {
       handler () {
-        // console.log('<< data.cell changed', this.data.cell)
-        console.log('!! cell changed', this.mode)
         switch (this.mode) {
           case FigureMode.ChoosingMove:
             this.toggleMode(FigureMode.Moving)
+            this.$emitter.emit('figure-started-moving', this.data.id)
             setTimeout(() => {
               this.toggleMode(FigureMode.Default)
+              this.$emitter.emit('figure-finished-moving', this.data.id)
             }, this.getTransitionDuration())
             break
         }
-        // this.toggleMode(FigureMode.Default)
       },
       deep: true
     },
@@ -190,13 +172,17 @@ export default defineComponent({
 
       switch (to) {
         case FigureMode.Default:
-          console.log('<<<<<<')
+          // console.log('<<<<<<')
           // console.log('@ activeFigure', this.activeFigure)
+          if (this.mode === FigureMode.ChoosingMove) {
+            this.hideAvailableMoves()
+          }
           if (this.mode === FigureMode.Moving) {
             this.$store.dispatch('game/setRollback', this.data.id)
           }
           break
         case FigureMode.ChoosingMove:
+          this.showAvailableMoves()
           this.$store.dispatch('setActiveFigure', this.data)
           break
         case FigureMode.Moving:
