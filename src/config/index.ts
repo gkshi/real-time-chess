@@ -1,4 +1,5 @@
 export default {
+  rollbackTime: 5000, // время отката в ms
   deck: {
     A8: {
       figure: 'rook',
@@ -129,32 +130,31 @@ export default {
       figure: 'pawn',
       color: 'white'
     }
-  },
-
+  }, // расположение фигур на столе
   figures: [
     {
-      id: 'king',
+      alias: 'king',
       name: 'Король'
     },
     {
-      id: 'queen',
+      alias: 'queen',
       name: 'Королева'
     },
     {
-      id: 'rook',
+      alias: 'rook',
       name: 'Турка'
     },
     {
-      id: 'bishop',
+      alias: 'bishop',
       name: 'Слон'
     },
     {
-      id: 'knight',
+      alias: 'knight',
       name: 'Конь'
     },
     {
-      id: 'pawn',
+      alias: 'pawn',
       name: 'Пешка'
     }
-  ]
+  ] // список фигур
 }

@@ -1,45 +1,76 @@
 import { createStore } from 'vuex'
-import { storePlugin } from '@/plugins/store'
-import { Cell, CellColor } from '@/types/Cell'
-import { Figure, FigureConstructor } from '@/types/Figure'
+import { Cell, CellColor, CellValue } from '@/types/Cell'
+import { Figure } from '@/types/Figure'
+import { FigureConstructor } from '@/types/FigureConstructor'
 import config from '@/config'
 
 import gameModule from './game'
 
+const initialState = () => ({
+  desk: [] as Cell[],
+  figures: [] as Figure[],
+  activeFigure: null as Figure,
+  highlightedCells: [] as CellValue[],
+  _generator: {
+    reverse: false,
+    rows: ['8', '7', '6', '5', '4', '3', '2', '1'],
+    cols: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+  }
+})
+
 export default createStore({
-  state: {
-    desk: [],
-    figures: [],
-    highlightedCells: [],
-    _generator: {
-      reverse: false,
-      rows: ['8', '7', '6', '5', '4', '3', '2', '1'],
-      cols: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
-    }
-  },
+  state: initialState(),
 
   actions: {
     async init ({ commit, dispatch }) {
-      console.log('[store][init]')
+      await dispatch('generateDesk')
       const figures = await dispatch('_generateFigures')
+      console.log('[store][init] figures', figures)
       commit('FIGURES_UPDATE', figures)
     },
 
-    async generateDeck ({ commit, dispatch, state }) {
-      console.log('[store][generateDeck]')
+    reset ({ commit, dispatch, state }) {
+      commit('RESET')
+      dispatch('init')
+      console.log('state.reverse', state._generator.reverse)
+    },
+
+    async generateDesk ({ commit, dispatch, state }) {
+      console.log('[store][generateDesk]', state._generator.reverse)
       const desk = []
       let i = 0
       for (let j = 0; j < state._generator.rows.length; j++) {
         for (let k = 0; k < state._generator.cols.length; k++) {
           desk.push(new Cell({
-            id: i,
-            name: `${state._generator.cols[k]}${state._generator.rows[j]}`,
+            id: i + 1,
+            value: `${state._generator.cols[k]}${state._generator.rows[j]}`,
             color: await dispatch('_cellColor', i)
           }))
           i++
         }
       }
+      console.log('[store][generateDesk]', desk)
       commit('DESK_UPDATE', desk)
+    },
+
+    setActiveFigure ({ commit }, figure) {
+      commit('ACTIVE_FIGURE_UPDATE', figure)
+    },
+
+    updateFigure ({ state, getters, commit }, payload) {
+      console.log('[store][updateFigure]', payload)
+      payload.figure = getters.figure(payload.query)
+      payload.index = getters.findIndexByQuery('figures', payload.query)
+      commit('FIGURE_UPDATE', payload)
+    },
+
+    setHighlightedCells ({ commit }, cells) {
+      commit('HIGHLIGHTED_CELLS_UPDATE', cells)
+    },
+
+    removeFromHighlightedCells ({ commit, state }, cell) {
+      const cells = state.highlightedCells.filter(i => i.value !== cell.value)
+      commit('HIGHLIGHTED_CELLS_UPDATE', cells)
     },
 
     _cellColor ({ state }, i: number): CellColor {
@@ -52,28 +83,42 @@ export default createStore({
         : i % 2 ? CellColor.Dark : CellColor.White
     },
 
-    _generateFigures (): Figure[] {
+    _generateFigures ({ getters }): Figure[] {
       const figures = []
-      Object.keys(config.deck).forEach(cell => {
+      Object.keys(config.deck).forEach((cell, i) => {
         const figure = FigureConstructor[config.deck[cell].figure]({
-          id: config.deck[cell].figure,
+          id: i + 1,
+          alias: config.deck[cell].figure,
           color: config.deck[cell].color,
-          $store: this,
-          cell
+          cell: getters.cell({ value: cell })
         })
         figures.push(figure)
       })
       return figures
-    },
-
-    setHighlightedCells ({ commit }, cells) {
-      commit('HIGHLIGHTED_CELLS_UPDATE', cells)
     }
   },
 
   mutations: {
+    RESET (state) {
+      const cleanState = initialState()
+      Object.keys(cleanState).forEach(key => {
+        state[key] = cleanState[key]
+      })
+    },
+
     FIGURES_UPDATE (state, figures) {
       state.figures = figures
+    },
+
+    FIGURE_UPDATE (state, payload) {
+      console.log('[FIGURE_UPDATE] payload', payload)
+      Object.keys(payload.data).forEach(option => {
+        payload.figure[option] = payload.data[option]
+      })
+    },
+
+    ACTIVE_FIGURE_UPDATE (state, figure) {
+      state.activeFigure = figure
     },
 
     DESK_UPDATE (state, desk) {
@@ -88,19 +133,47 @@ export default createStore({
   getters: {
     figures: state => state.figures,
 
-    cell: state => query => {
-      const res = state.desk.find(cell => {
-        let found = false
+    findByQuery: state => (target, query) => {
+      // console.log('[getters/findByQuery] target', target, 'query', query)
+      const res = state[target].find(item => {
+        let foundOption = 0
         Object.keys(query).forEach(key => {
-          found = cell[key] === query[key]
+          if (item[key] === query[key]) {
+            foundOption++
+          }
         })
-        return found ? cell : null
+        return foundOption === Object.keys(query).length ? item : null
       })
       return res
     },
 
+    findIndexByQuery: state => (target, query) => {
+      const res = state[target].findIndex(item => {
+        let foundOption = 0
+        Object.keys(query).forEach(key => {
+          if (item[key] === query[key]) {
+            foundOption++
+          }
+        })
+        return foundOption === Object.keys(query).length
+      })
+      return res
+    },
+
+    figure: (state, getters) => query => {
+      return getters.findByQuery('figures', query)
+    },
+
+    cell: (state, getters) => query => {
+      // console.log('[getters/cell] query', query)
+      if (typeof query === 'string') {
+        query = { value: query }
+      }
+      return getters.findByQuery('desk', query)
+    },
+
     cellPosition: (state, getters) => cell => {
-      const storedCell = getters.cell({ name: cell })
+      const storedCell = getters.cell({ id: cell.id })
       if (!storedCell) {
         return {
           top: null,
@@ -108,12 +181,9 @@ export default createStore({
         }
       }
 
-      const number = storedCell.name.slice(1)
-      const letter = storedCell.name.slice(0, 1)
-
-      const top = 12.5 * (8 - number)
+      const top = 12.5 * (8 - cell.number)
       let left
-      switch (letter) {
+      switch (cell.letter) {
         case 'A':
           left = 0
           break
@@ -155,7 +225,5 @@ export default createStore({
     game: gameModule
   },
 
-  plugins: [
-    storePlugin
-  ]
+  plugins: []
 })

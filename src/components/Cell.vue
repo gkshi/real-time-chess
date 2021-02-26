@@ -1,23 +1,21 @@
 <template lang="pug">
-.cell-component.flex.center(:class="classList")
-  // div {{ data.name }}
+.cell-component.flex.center(:class="classList" @click="onClick")
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
-import { CellColor } from '@/types/CellColor'
+import { Cell } from '@/types/Cell'
 
 export default defineComponent({
   name: 'CellComponent',
 
   props: {
-    data: Object,
-    color: String as PropType<CellColor>,
-    index: Number
+    data: Object as PropType<Cell>,
+    index: Number as PropType<number>
   },
 
   computed: {
-    classList () {
+    classList (): any {
       return [
         `-color-${this.data.color}`,
         {
@@ -26,8 +24,17 @@ export default defineComponent({
       ]
     },
 
-    isHighlighted () {
-      return this.$store.state.highlightedCells.includes(this.data.name)
+    isHighlighted (): boolean {
+      return this.$store.state.highlightedCells.includes(this.data.value)
+    }
+  },
+
+  methods: {
+    onClick () {
+      // console.log('[cell][onClick]', this.data.value)
+      this.$store.dispatch('game/makeMove', {
+        cell: this.data.value
+      })
     }
   }
 })

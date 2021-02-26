@@ -1,25 +1,50 @@
 <template lang="pug">
-.figures-component
-  FigureComponent(
+.figures-component(@click="onClick")
+  component(
     v-for="(figure, i) in figures"
+    :is="`figure-${figure.alias}`"
     :data="figure"
     :key="`${figure.id}-${i}`")
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import FigureComponent from '@/components/Figure.vue'
+import { Figure } from '@/types/Figure'
+
+import FigureRook from '@/components/figures/Rook.vue'
+import FigureKnight from '@/components/figures/Knight.vue'
+import FigureBishop from '@/components/figures/Bishop.vue'
+import FigureKing from '@/components/figures/King.vue'
+import FigureQueen from '@/components/figures/Queen.vue'
+import FigurePawn from '@/components/figures/Pawn.vue'
 
 export default defineComponent({
   name: 'FiguresComponent',
 
   components: {
-    FigureComponent
+    FigureRook,
+    FigureKnight,
+    FigureBishop,
+    FigureKing,
+    FigureQueen,
+    FigurePawn
   },
 
   computed: {
-    figures () {
+    isGameStarted (): boolean {
+      return this.$store.getters['game/started']
+    },
+
+    figures (): Figure[] {
       return this.$store.getters.figures
+    }
+  },
+
+  methods: {
+    onClick () {
+      if (!this.isGameStarted) {
+        this.$store.dispatch('game/start')
+      }
     }
   }
 })

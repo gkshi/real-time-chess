@@ -7,26 +7,26 @@ export enum CellColor {
 
 export interface Cell {
   id: number;
-  name: string;
+  value: CellValue;
   color: CellColor;
 }
 
 export class Cell {
   constructor (props) {
     if (typeof props === 'string') {
-      props = { name: props }
+      props = { value: props }
     }
 
     this.id = props.id
-    this.name = props.name
+    this.value = props.value
     this.color = props.color
   }
 
   public get letter () {
-    return this.name.slice(0, 1)
+    return this.value ? this.value.slice(0, 1) : undefined
   }
 
   public get number () {
-    return +this.name.slice(1)
+    return this.value ? +this.value.slice(1) : undefined
   }
 }
