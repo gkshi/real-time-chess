@@ -8,7 +8,7 @@ FigureComponent.figure-pawn-component(
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import { Figure } from '@/types/Figure'
-import { Cell, CellValue } from '@/types/Cell'
+import { CellValue } from '@/types/Cell'
 
 import FigureComponent from '@/components/Figure.vue'
 
@@ -55,12 +55,22 @@ export default defineComponent({
           break
       }
       availableMoves = this.validateAvailableMoves(availableMoves)
-      console.log('availableMoves', availableMoves)
+      availableMoves = [...availableMoves, ...this.checkKillCells()]
       return availableMoves
     },
 
-    checkKillCells (): CellValue[] {
-      return []
+    checkKillCells () {
+      let diagonalCells = this.$helpers.diagonalCells(this.data.cell.value)
+      diagonalCells = this.$helpers.validateDiagonalCells({
+        moves: diagonalCells,
+        currentCellValue: this.data.cell.value,
+        length: 1
+      })
+      let res = []
+      Object.values(diagonalCells).forEach((row: any) => {
+        res = [...res, ...row]
+      })
+      return res
     },
 
     validateAvailableMoves (moves): CellValue[] {

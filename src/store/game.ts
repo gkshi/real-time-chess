@@ -12,7 +12,6 @@ export default {
   actions: {
     start ({ commit, getters }) {
       if (!getters.started) {
-        console.log('<! start')
         commit('TIMEOUT_START')
       }
     },
