@@ -14,7 +14,7 @@ const initialState = () => ({
   _generator: {
     reverse: false,
     rows: ['8', '7', '6', '5', '4', '3', '2', '1'],
-    cols: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+    cols: config.deckCols
   }
 })
 

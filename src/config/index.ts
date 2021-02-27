@@ -1,5 +1,10 @@
+import { Figure } from '@/types/Figure'
+
 export default {
-  rollbackTime: 5000, // время отката в ms
+  rollbackTime: 1000 as number, // время отката в ms
+
+  deckCols: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] as string[],
+
   deck: {
     A8: {
       figure: 'rook',
@@ -131,6 +136,7 @@ export default {
       color: 'white'
     }
   }, // расположение фигур на столе
+
   figures: [
     {
       alias: 'king',
@@ -156,5 +162,5 @@ export default {
       alias: 'pawn',
       name: 'Пешка'
     }
-  ] // список фигур
+  ] as Figure[] // список фигур
 }

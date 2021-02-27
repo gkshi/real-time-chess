@@ -68,14 +68,6 @@ export default defineComponent({
   },
 
   watch: {
-    // mode (mode) {
-    //   if (mode === FigureMode.ChoosingMove) {
-    //     this.showAvailableMoves()
-    //   } else {
-    //     this.hideAvailableMoves()
-    //   }
-    // },
-
     'data.cell': {
       handler () {
         switch (this.mode) {
@@ -121,9 +113,6 @@ export default defineComponent({
 
     startRollbackTimer () {
       this.stopRollbackTimer()
-      // this.$nextTick(() => {
-      //   this.rollbackTimer = 1000
-      // })
       setTimeout(() => {
         this.rollbackTimer = 1000
       }, 100)
@@ -150,7 +139,6 @@ export default defineComponent({
     },
 
     onClick (): void {
-      // console.log('figure onClick', this.data.id)
       this.$emitter.emit('click', this.data.id)
 
       this.$nextTick(() => {
@@ -172,8 +160,6 @@ export default defineComponent({
 
       switch (to) {
         case FigureMode.Default:
-          // console.log('<<<<<<')
-          // console.log('@ activeFigure', this.activeFigure)
           if (this.mode === FigureMode.ChoosingMove) {
             this.hideAvailableMoves()
           }
@@ -246,7 +232,7 @@ export default defineComponent({
 
     &.-mode {
       &-choosing-move {
-        background: $color-cell-highlighted;
+        // background: $color-cell-highlighted;
       }
       &-moving {
         cursor: default;

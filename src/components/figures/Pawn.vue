@@ -8,7 +8,7 @@ FigureComponent.figure-pawn-component(
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import { Figure } from '@/types/Figure'
-import { CellValue } from '@/types/Cell'
+import { Cell, CellValue } from '@/types/Cell'
 
 import FigureComponent from '@/components/Figure.vue'
 
@@ -38,9 +38,8 @@ export default defineComponent({
       const cell = this.data.cell
       console.log('[Pawn][getAvailableMoves] from cell', cell)
 
-      const availableMoves = []
+      let availableMoves = []
       const isFirstMove = !this.moves
-      // const filledCells = this.$store.getters.filledCells
       switch (this.data.color) {
         case 'white':
           availableMoves.push(`${cell.letter}${cell.number + 1}`)
@@ -55,9 +54,19 @@ export default defineComponent({
           }
           break
       }
-      // console.log('availableMoves', availableMoves)
-      // this.moves++
+      availableMoves = this.validateAvailableMoves(availableMoves)
+      console.log('availableMoves', availableMoves)
       return availableMoves
+    },
+
+    checkKillCells (): CellValue[] {
+      return []
+    },
+
+    validateAvailableMoves (moves): CellValue[] {
+      const filledCellValues = this.$store.getters.filledCells.map(i => i.value)
+      moves = this.$helpers.validateCellLines(moves, filledCellValues, this.data.cell.value)
+      return moves.filter(i => !filledCellValues.includes(i))
     },
 
     onClick () {
