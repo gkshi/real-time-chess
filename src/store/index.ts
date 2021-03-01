@@ -9,6 +9,7 @@ import gameModule from './game'
 const initialState = () => ({
   desk: [] as Cell[],
   figures: [] as Figure[],
+  unavailableFigures: [] as Figure[],
   activeFigure: null as Figure,
   highlightedCells: [] as CellValue[],
   _generator: {
@@ -32,7 +33,7 @@ export default createStore({
     reset ({ commit, dispatch, state }) {
       commit('RESET')
       dispatch('init')
-      console.log('state.reverse', state._generator.reverse)
+      // console.log('state.reverse', state._generator.reverse)
     },
 
     async generateDesk ({ commit, dispatch, state }) {
@@ -70,6 +71,15 @@ export default createStore({
     removeFromHighlightedCells ({ commit, state }, cell) {
       const cells = state.highlightedCells.filter(i => i.value !== cell.value)
       commit('HIGHLIGHTED_CELLS_UPDATE', cells)
+    },
+
+    markFigureAsUnavailable ({ commit }, id) {
+      commit('UNAVAILABLE_FIGURES_ADD', id)
+    },
+
+    killFigure ({ commit, state }, id) {
+      console.log('[killFigure]', id)
+      // commit('FIGURES_UPDATE', state.figures.filter(i => i.id !== id))
     },
 
     _cellColor ({ state }, i: number): CellColor {
@@ -116,6 +126,10 @@ export default createStore({
       })
     },
 
+    UNAVAILABLE_FIGURES_ADD (state, id) {
+      state.unavailableFigures.push(id)
+    },
+
     ACTIVE_FIGURE_UPDATE (state, figure) {
       state.activeFigure = figure
     },
@@ -131,6 +145,8 @@ export default createStore({
 
   getters: {
     figures: state => state.figures,
+
+    figuresByColor: state => color => state.figures.filter(i => i.color === color),
 
     findByQuery: state => (target, query) => {
       // console.log('[getters/findByQuery] target', target, 'query', query)
@@ -210,8 +226,8 @@ export default createStore({
       }
 
       return {
-        top: `${top}%`,
-        left: `${left}%`
+        top,
+        left
       }
     },
 

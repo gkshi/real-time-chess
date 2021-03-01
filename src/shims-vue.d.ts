@@ -4,3 +4,9 @@ declare module '*.vue' {
   const component: DefineComponent<{}, {}, any>
   export default component
 }
+
+export declare global {
+  interface Element {
+    __vueParentComponent?: any
+  }
+}

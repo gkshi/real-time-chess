@@ -83,7 +83,7 @@ export default defineComponent({
         currentCellValue: this.data.cell.value,
         gameFigures: this.gameFigures
       })
-      console.log('availableMoves', availableMoves)
+      // console.log('availableMoves', availableMoves)
       return availableMoves
     },
 

@@ -1,8 +1,12 @@
 <template lang="pug">
 .menu-component
-  div
+  section
     div timer: {{ timer }}
     button(@click="reset") reset
+
+  section
+    div black figures: {{ blackFiguresAmount }}
+    div white figures: {{ whiteFiguresAmount }}
 </template>
 
 <script lang="ts">
@@ -14,6 +18,14 @@ export default defineComponent({
   computed: {
     timer () {
       return this.$store.state.game.timer
+    },
+
+    blackFiguresAmount () {
+      return this.$store.getters.figuresByColor('dark').length
+    },
+
+    whiteFiguresAmount () {
+      return this.$store.getters.figuresByColor('white').length
     }
   },
 
@@ -32,5 +44,11 @@ export default defineComponent({
     top: 5%;
     left: 5%;
     background: $color-page-bg;
+
+    section {
+      &:not(:last-child) {
+        margin-bottom: 20px;
+      }
+    }
   }
 </style>
