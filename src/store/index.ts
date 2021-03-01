@@ -25,7 +25,7 @@ export default createStore({
     async init ({ commit, dispatch }) {
       await dispatch('generateDesk')
       const figures = await dispatch('_generateFigures')
-      console.log('[store][init] figures', figures)
+      console.log('[store][init]')
       commit('FIGURES_UPDATE', figures)
     },
 
@@ -36,7 +36,6 @@ export default createStore({
     },
 
     async generateDesk ({ commit, dispatch, state }) {
-      console.log('[store][generateDesk]', state._generator.reverse)
       const desk = []
       let i = 0
       for (let j = 0; j < state._generator.rows.length; j++) {
@@ -49,7 +48,7 @@ export default createStore({
           i++
         }
       }
-      console.log('[store][generateDesk]', desk)
+      console.log('[store][generateDesk]')
       commit('DESK_UPDATE', desk)
     },
 
@@ -218,7 +217,9 @@ export default createStore({
 
     maxCellNumber: (state) => state._generator.rows.length,
 
-    filledCells: state => state.figures.map(i => i.cell)
+    filledCells: state => state.figures.map(i => i.cell),
+
+    filledCellValues: state => state.figures.map(i => i.cell.value)
   },
 
   modules: {
