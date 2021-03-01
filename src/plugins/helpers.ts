@@ -1,8 +1,7 @@
-import { Cell, CellColor, CellValue } from '@/types/Cell'
+import { Cell, CellValue } from '@/types/Cell'
 import { EnemyBlocking, DirectionName, Direction } from '@/types/Game'
 import config from '@/config'
 import { Figure } from '@/types/Figure'
-import game from '@/store/game'
 
 enum NextCellMode {
   Lower = 'lower',
@@ -21,176 +20,20 @@ const helpers = (app, options) => ({
   minNumber: 0,
   maxNumber: config.deckCols.length,
 
-  validateCellLines: (moves: CellValue[], filledCells: CellValue[], currentCellValue: CellValue) => {
-    const currentCell = new Cell(currentCellValue) as Cell
-
-    let res = []
-    const letters = new Set(moves.map(i => {
-      const cell = new Cell(i)
-      return cell.letter
-    }))
-
-    letters.forEach((letter: string) => {
-      let lines = []
-      const lineFilled = filledCells.filter(i => i.slice(0, 1) === letter)
-      const lineMoves = moves.filter(i => i.slice(0, 1) === letter)
-      lineFilled.sort()
-      lineMoves.sort()
-
-      DIRECTIONS.STRONG.forEach((dir: DirectionName) => {
-        const line = []
-        let index = 1
-        let doing = true
-
-        while (doing) {
-          let c
-          const letterIndex = config.deckCols.indexOf(letter)
-          switch (dir) {
-            case 'top':
-              c = `${letter}${currentCell.number + index}`
-              break
-            case 'right':
-              c = `${config.deckCols[letterIndex + 1]}${currentCell.number}`
-              break
-            case 'bottom':
-              c = `${letter}${currentCell.number - index}`
-              break
-            case 'left':
-              c = `${config.deckCols[letterIndex - 1]}${currentCell.number - index}`
-              break
-          }
-          if (!lineMoves.includes(c)) {
-            doing = false
-            break
-          }
-          if (lineFilled.includes(c)) {
-            doing = false
-          } else {
-            line.push(c)
-            index++
-          }
-        }
-
-        lines = [...lines, ...line]
-      })
-
-      res = [...res, ...lines]
-    })
-    return res
-  },
-
-  diagonalCells (currentCellValue: CellValue) {
-    // console.log('---')
-    const res = {}
-    const currentCell = new Cell(currentCellValue) as Cell
-    // console.log('currentCell', currentCell)
-    const directions = ['top-left', 'top-right', 'bottom-left', 'bottom-right']
-    directions.forEach(dir => {
-      // console.log('dir', dir)
-      // const index = 1
-      const cells = []
-      let doing = true
-      let cell = currentCell.value
-      const prevIndex = config.deckCols.indexOf(cell.slice(0, 1))
-
-      switch (dir) {
-        case 'top-left':
-          cell = `${config.deckCols[prevIndex - 1]}${currentCell.number + 1}`
-          while (doing) {
-            cells.push(cell)
-            const letterIndex = config.deckCols.indexOf(cell.slice(0, 1))
-            const nextLetter = config.deckCols[letterIndex - 1]
-            const nextNumber = +cell.slice(1) !== this.maxNumber ? +cell.slice(1) + 1 : 0
-            if (nextLetter && nextNumber) {
-              cell = `${nextLetter}${nextNumber}`
-            } else {
-              doing = false
-            }
-          }
-          break
-
-        case 'top-right':
-          cell = `${config.deckCols[prevIndex + 1]}${currentCell.number + 1}`
-          while (doing) {
-            cells.push(cell)
-            const letterIndex = config.deckCols.indexOf(cell.slice(0, 1))
-            const nextLetter = config.deckCols[letterIndex + 1]
-            const nextNumber = +cell.slice(1) !== this.maxNumber ? +cell.slice(1) + 1 : 0
-            if (nextLetter && nextNumber) {
-              cell = `${nextLetter}${nextNumber}`
-            } else {
-              doing = false
-            }
-          }
-          break
-
-        case 'bottom-left':
-          cell = `${config.deckCols[prevIndex - 1]}${currentCell.number - 1}`
-          while (doing) {
-            cells.push(cell)
-            const letterIndex = config.deckCols.indexOf(cell.slice(0, 1))
-            const nextLetter = config.deckCols[letterIndex - 1]
-            const nextNumber = +cell.slice(1) !== this.minNumber ? +cell.slice(1) - 1 : 0
-            if (nextLetter && nextNumber) {
-              cell = `${nextLetter}${nextNumber}`
-            } else {
-              doing = false
-            }
-          }
-          break
-
-        case 'bottom-right':
-          cell = `${config.deckCols[prevIndex + 1]}${currentCell.number - 1}`
-          while (doing) {
-            cells.push(cell)
-            const letterIndex = config.deckCols.indexOf(cell.slice(0, 1))
-            const nextLetter = config.deckCols[letterIndex + 1]
-            const nextNumber = +cell.slice(1) !== this.minNumber ? +cell.slice(1) - 1 : 0
-            if (nextLetter && nextNumber) {
-              cell = `${nextLetter}${nextNumber}`
-            } else {
-              doing = false
-            }
-          }
-          break
-      }
-
-      res[dir] = cells
-    })
-    // console.log('---')
-    return res
-  },
-
-  validateDiagonalCells: ({ moves, currentCellValue, filledCells, length }) => {
-    // console.log('validateDiagonalCells', moves, currentCellValue, filledCells, length)
-    Object.keys(moves).forEach(key => {
-      const line = []
-      moves[key].every((cell: CellValue) => {
-        line.push(cell)
-        return !filledCells.includes(cell)
-      })
-
-      moves[key] = line
-    })
-
-    if (length) {
-      Object.keys(moves).forEach(key => {
-        moves[key] = moves[key].slice(0, length)
-      })
-    }
-    return moves
-  },
-
-  getLine: (direction) => {
-    console.log('[get line]', direction)
-  },
-
   _isCellFilled (targetCell, figures) {
     return !!figures.find(i => i.cell.value === targetCell)
   },
 
+  _isCellFilledByAlly (targetCell, comparingCell, figures) {
+    if (!this._isCellFilled(targetCell, figures)) {
+      return false
+    }
+    const targetCellFigure = figures.find(i => i.cell.value === targetCell)
+    const comparingCellFigure = figures.find(i => i.cell.value === comparingCell)
+    return comparingCellFigure.color === targetCellFigure.color
+  },
+
   _isCellFilledByEnemy (targetCell, comparingCell, figures) {
-    // console.log('[_isCellFilledByEnemy]', targetCell, comparingCell)
     if (!this._isCellFilled(targetCell, figures)) {
       return false
     }
@@ -289,11 +132,9 @@ const helpers = (app, options) => ({
   },
 
   _validateCellLine (moves, gameFigures) {
-    // console.log('_validateCellLine', moves, gameFigures)
     const res = []
     moves.every(move => {
       const figure = gameFigures.filter(i => i.cell.value === move)
-      // console.log('figure', figure)
       res.push(move)
       return !figure.length
     })
@@ -308,18 +149,27 @@ const helpers = (app, options) => ({
       cell = this._getNextCell(direction, cell)
     }
 
-    // length
+    // Проверяем на свои фигуры
+    const _clean = []
+    cells.every(cell => {
+      if (this._isCellFilledByAlly(cell, startCellValue, gameFigures)) {
+        return false
+      }
+      _clean.push(cell)
+      return true
+    })
+    cells = _clean
+
+    // Проверяем правило length
     if ('length' in direction.rules) {
       cells = cells.filter((i, j) => j < direction.rules.length)
     }
 
-    // enemyBlocking
+    // Проверяем правило enemyBlocking
     if ('enemyBlocking' in direction.rules) {
       const res = []
       if (direction.rules.enemyBlocking === EnemyBlocking.NotIncluding) {
-        // console.log('!! cells', cells, cells.length, cells.every)
         cells.every(cell => {
-          // console.log('<< cell', cell)
           if (this._isCellFilledByEnemy(cell, startCellValue, gameFigures)) {
             return false
           }
@@ -330,7 +180,7 @@ const helpers = (app, options) => ({
       cells = res
     }
 
-    // enemyRequired
+    // Проверяем правило enemyRequired
     if ('enemyRequired' in direction.rules) {
       const res = []
       cells.every(cell => {
@@ -343,17 +193,13 @@ const helpers = (app, options) => ({
       cells = res
     }
 
-    console.log('[getDirectionMoves]', cells)
     return cells
   },
 
   getAvailableMoves ({ directions, currentCellValue, gameFigures }) {
-    console.log('[getAvailableMoves]')
     let res = []
     Object.values(directions).forEach((dir: Direction) => {
-      console.log('dir:', dir.name, ', rules: ', dir.rules)
       let moves = this.getDirectionMoves(dir, currentCellValue, gameFigures)
-      console.log('dir moves', moves)
       moves = this._validateCellLine(moves, gameFigures)
       res = [...res, ...moves]
     })
