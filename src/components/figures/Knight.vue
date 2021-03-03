@@ -53,7 +53,7 @@ export default defineComponent({
             [{ left: 1 }, { bottom: 2 }]
           ],
           commonRules: {
-            enemyRequired: true
+            allyCrossing: true
           }
         },
         currentCellValue: this.data.cell.value,

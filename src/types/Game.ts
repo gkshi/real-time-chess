@@ -1,8 +1,3 @@
-export enum EnemyBlocking {
-  Including = 'including',
-  NotIncluding = 'not-including'
-}
-
 export enum DirectionName {
   TopLeft = 'top-left',
   Top = 'top',
@@ -14,18 +9,24 @@ export enum DirectionName {
   Left = 'left'
 }
 
+export enum EnemyBlocking {
+  Including = 'including',
+  NotIncluding = 'not-including'
+}
+
 export interface DirectionRule {
   length?: number;
-  enemyBlocking?: EnemyBlocking,
-  enemyRequired?: boolean
+  enemyBlocking?: EnemyBlocking;
+  enemyRequired?: boolean;
+  allyCrossing?: boolean;
 }
 
 export interface Direction {
-  name: DirectionName,
-  rules?: DirectionRule
+  name: DirectionName;
+  rules?: DirectionRule;
 }
 
 export interface Directions {
-  values?: any,
-  commonRules?: DirectionRule
+  values?: any;
+  commonRules?: DirectionRule;
 }

@@ -12,11 +12,11 @@ export const flowerDarkPosition = () => ({
     color: 'dark'
   },
   D8: {
-    figure: 'king',
+    figure: 'queen',
     color: 'dark'
   },
   E8: {
-    figure: 'queen',
+    figure: 'king',
     color: 'dark'
   },
   F8: {
@@ -77,11 +77,11 @@ export const flowerDarkPosition = () => ({
     color: 'white'
   },
   D1: {
-    figure: 'king',
+    figure: 'queen',
     color: 'white'
   },
   E1: {
-    figure: 'queen',
+    figure: 'king',
     color: 'white'
   },
   F1: {

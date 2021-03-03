@@ -1,8 +1,7 @@
-import { Cell, CellValue } from '@/types/Cell'
 import { EnemyBlocking, DirectionName, Direction, Directions } from '@/types/Game'
-import config from '@/config'
+import { Cell, CellValue } from '@/types/Cell'
 import { Figure } from '@/types/Figure'
-import { createLogger } from 'vuex'
+import config from '@/config'
 
 enum NextCellMode {
   Lower = 'lower',
@@ -21,25 +20,28 @@ const helpers = (app, options) => ({
   minNumber: 0,
   maxNumber: config.deckCols.length,
 
-  _isCellFilled (targetCell, figures) {
-    return !!figures.find(i => i.cell.value === targetCell)
+  _isCellFilled (targetCell: CellValue, gameFigures: Figure[]) {
+    // console.log('[_isCellFilled]', gameFigures)
+    return !!gameFigures.find(i => i.cell.value === targetCell)
   },
 
-  _isCellFilledByAlly (targetCell, comparingCell, figures) {
-    if (!this._isCellFilled(targetCell, figures)) {
+  _isCellFilledByAlly (targetCell: CellValue, comparingCell, gameFigures: Figure[]) {
+    // console.log('[_isCellFilledByAlly]', gameFigures)
+    if (!this._isCellFilled(targetCell, gameFigures)) {
       return false
     }
-    const targetCellFigure = figures.find(i => i.cell.value === targetCell)
-    const comparingCellFigure = figures.find(i => i.cell.value === comparingCell)
+    const targetCellFigure = gameFigures.find(i => i.cell.value === targetCell)
+    const comparingCellFigure = gameFigures.find(i => i.cell.value === comparingCell)
     return comparingCellFigure.color === targetCellFigure.color
   },
 
-  _isCellFilledByEnemy (targetCell, comparingCell, figures) {
-    if (!this._isCellFilled(targetCell, figures)) {
+  _isCellFilledByEnemy (targetCell: CellValue, comparingCell, gameFigures: Figure[]) {
+    // console.log('_isCellFilledByEnemy]', gameFigures)
+    if (!this._isCellFilled(targetCell, gameFigures)) {
       return false
     }
-    const targetCellFigure = figures.find(i => i.cell.value === targetCell)
-    const comparingCellFigure = figures.find(i => i.cell.value === comparingCell)
+    const targetCellFigure = gameFigures.find(i => i.cell.value === targetCell)
+    const comparingCellFigure = gameFigures.find(i => i.cell.value === comparingCell)
     return comparingCellFigure.color !== targetCellFigure.color
   },
 
@@ -131,61 +133,58 @@ const helpers = (app, options) => ({
     return cell
   },
 
-  _validateCellLine (moves, gameFigures) {
-    const res = []
-    moves.every(move => {
-      // Простая проверка на нахождение фигуры в ячейке
-      const figure = gameFigures.filter(i => i.cell.value === move)
-      res.push(move)
-      return !figure.length
-    })
-    return res
-  },
-
-  getDirectionMoves (direction: Direction, startCellValue: CellValue, gameFigures: Figure[]) {
-    let cells = []
-    let cell = this._getNextCell(direction, startCellValue)
-    while (cell) {
-      cells.push(cell)
-      cell = this._getNextCell(direction, cell)
-    }
-
-    // Проверяем на свои фигуры
+  _validateMovesByAlly (moves: CellValue[], startCellValue: CellValue, gameFigures: Figure[]) {
     const _clean = []
-    cells.every(cell => {
+    moves.every(cell => {
       if (this._isCellFilledByAlly(cell, startCellValue, gameFigures)) {
         return false
       }
       _clean.push(cell)
       return true
     })
-    cells = _clean
+    return _clean
+  },
+
+  _validateMovesByRules (moves, rules, startCellValue: CellValue, gameFigures: Figure[]) {
+    if (!moves) {
+      return []
+    }
+    // console.log('_validateMovesByRules', gameFigures)
+    if (!Array.isArray(moves)) {
+      moves = [moves]
+    }
+    let cells = [...moves]
+
+    rules = rules || {}
+    const defaultRules = {
+      enemyBlocking: EnemyBlocking.Including,
+      enemyRequired: false,
+      allyCrossing: false
+    }
+    rules = { ...defaultRules, ...rules }
+
+    console.log('rules', rules)
 
     // Проверяем правило length
-    if ('length' in direction.rules) {
-      cells = cells.filter((i, j) => j < direction.rules.length)
+    if ('length' in rules) {
+      cells = cells.slice(0, rules.length)
     }
+
+    console.log('cells1', cells)
+
+    // Проверяем ячейку на союзные фигуры
+    cells = this._validateMovesByAlly(cells, startCellValue, gameFigures)
+
+    console.log('cells2', cells)
 
     // Проверяем правило enemyBlocking
-    if ('enemyBlocking' in direction.rules) {
-      const res = []
-      if (direction.rules.enemyBlocking === EnemyBlocking.NotIncluding) {
-        cells.every(cell => {
-          if (this._isCellFilledByEnemy(cell, startCellValue, gameFigures)) {
-            return false
-          }
-          res.push(cell)
-          return true
-        })
-      }
-      cells = res
-    }
-
-    // Проверяем правило enemyRequired
-    if ('enemyRequired' in direction.rules) {
+    if ('enemyBlocking' in rules) {
       const res = []
       cells.every(cell => {
-        if (!this._isCellFilledByEnemy(cell, startCellValue, gameFigures)) {
+        if (this._isCellFilledByEnemy(cell, startCellValue, gameFigures)) {
+          if (rules.enemyBlocking === EnemyBlocking.Including) {
+            res.push(cell)
+          }
           return false
         }
         res.push(cell)
@@ -194,6 +193,37 @@ const helpers = (app, options) => ({
       cells = res
     }
 
+    console.log('cells3', cells)
+
+    // Проверяем правило enemyRequired
+    if ('enemyRequired' in rules) {
+      if (rules.enemyRequired) {
+        const res = []
+        cells.every(cell => {
+          if (!this._isCellFilledByEnemy(cell, startCellValue, gameFigures)) {
+            return false
+          }
+          res.push(cell)
+          return true
+        })
+        cells = res
+      }
+    }
+
+    console.log('cells4', cells)
+
+    return cells
+  },
+
+  _getDirectionMoves (direction: Direction, startCellValue: CellValue, gameFigures: Figure[]) {
+    let cells = []
+    let cell = this._getNextCell(direction, startCellValue)
+    while (cell) {
+      cells.push(cell)
+      cell = this._getNextCell(direction, cell)
+    }
+    // cells = this._validateMovesByAlly(cells, startCellValue, gameFigures)
+    cells = this._validateMovesByRules(cells, direction.rules, startCellValue, gameFigures)
     return cells
   },
 
@@ -205,13 +235,14 @@ const helpers = (app, options) => ({
 
     if (Array.isArray(directions)) {
       // Собираем ячейки подряд (по направлениям)
+      directions = directions as Direction[]
       Object.values(directions).forEach((dir: Direction) => {
-        let moves = this.getDirectionMoves(dir, currentCellValue, gameFigures)
-        moves = this._validateCellLine(moves, gameFigures)
+        const moves = this._getDirectionMoves(dir, currentCellValue, gameFigures)
         res = [...res, ...moves]
       })
     } else {
       // Собираем конкретные ячейки (по шагам)
+      directions = directions as Directions
       directions.values.forEach(coordinate => {
         let cell = currentCellValue
         coordinate.forEach(step => {
@@ -221,6 +252,7 @@ const helpers = (app, options) => ({
             cell = this._getNextCell({ name: direction }, cell)
           }
         })
+        cell = this._validateMovesByRules(cell, directions.commonRules, currentCellValue, gameFigures)[0]
         if (cell) {
           res.push(cell)
         }
