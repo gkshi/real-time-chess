@@ -2,7 +2,9 @@
 .menu-component
   section
     div timer: {{ timer }}
-    button(@click="reset") reset
+
+  section
+    button(@click="reset") Restart game
 
   section
     div black figures: {{ blackFiguresAmount }}
@@ -17,7 +19,9 @@ export default defineComponent({
 
   computed: {
     timer () {
-      return this.$store.state.game.timer
+      const min = Math.floor(this.$store.state.game.timer / 60)
+      const sec = this.$store.state.game.timer % 60
+      return `${min.toString().length < 2 ? `0${min}` : min}:${sec.toString().length < 2 ? `0${sec}` : sec}`
     },
 
     blackFiguresAmount () {

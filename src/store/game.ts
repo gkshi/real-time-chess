@@ -1,14 +1,16 @@
 import config from '@/config'
 
+const defaultState = () => ({
+  interval: null,
+  timer: 0,
+  rollbacks: [],
+  winner: null
+})
+
 export default {
   namespaced: true,
 
-  state: {
-    interval: null,
-    timer: 0,
-    rollbacks: [],
-    winner: null
-  },
+  state: defaultState(),
 
   actions: {
     start ({ commit, getters }) {
@@ -23,7 +25,7 @@ export default {
 
     reset ({ commit, dispatch }) {
       // console.log('[game/reset]')
-      commit('TIMEOUT_RESET')
+      commit('RESET')
       dispatch('reset', null, { root: true })
     },
 
@@ -62,16 +64,18 @@ export default {
   },
 
   mutations: {
+    RESET (state) {
+      clearInterval(state.interval)
+      const clean = defaultState()
+      Object.keys(clean).forEach(key => {
+        state[key] = clean[key]
+      })
+    },
+
     TIMEOUT_START (state) {
       state.interval = setInterval(() => {
         state.timer++
       }, 1000)
-    },
-
-    TIMEOUT_RESET (state) {
-      clearInterval(state.interval)
-      state.interval = null
-      state.timer = 0
     },
 
     ROLLBACK_ADD (state, figureId) {

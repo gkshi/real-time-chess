@@ -116,6 +116,7 @@ export default defineComponent({
   },
 
   beforeUnmount () {
+    this.stopRollbackTimer()
     this.$emitter.off('click', this.handleClick)
     this.$emitter.off('figure-finished-moving', this.onFigureFinishedMoving)
   },
