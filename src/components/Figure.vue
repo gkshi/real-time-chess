@@ -1,11 +1,13 @@
 <template lang="pug">
 .figure-component.flex.center(
   :data-id="data.id"
+  :data-key="data.key"
   :class="classList"
   :style="cellPosition"
   @click="onClick")
   .model(ref="model")
   .rollback(v-show="inRollback" :style="`height:${rollbackPercent}%`")
+  .id {{ data.id }}
   .slot
     slot
 </template>
@@ -13,6 +15,7 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import { Figure } from '@/types/Figure'
+import { Cell } from '@/types/Cell'
 import config from '@/config'
 
 enum FigureMode {
@@ -57,7 +60,7 @@ export default defineComponent({
     },
 
     cellPosition (): string {
-      const position = this.$store.getters.cellPosition(this.data.cell)
+      const position = this.$store.getters.cellPosition(this.data.targetCell)
       const top = position.top / 12.5
       const left = position.left / 12.5
       return `transform: translate(${100 * left}%, ${100 * top}%)`
@@ -86,7 +89,7 @@ export default defineComponent({
   },
 
   watch: {
-    'data.cell': {
+    'data.targetCell': {
       handler () {
         switch (this.mode) {
           case FigureMode.ChoosingMove:
@@ -109,13 +112,13 @@ export default defineComponent({
 
   mounted () {
     this.onInit()
-    // this.$on('click', this.handleClick)
     this.$emitter.on('click', this.handleClick)
+    this.$emitter.on('figure-finished-moving', this.onFigureFinishedMoving)
   },
 
   beforeUnmount () {
-    // this.$off('click')
     this.$emitter.off('click', this.handleClick)
+    this.$emitter.off('figure-finished-moving', this.onFigureFinishedMoving)
   },
 
   methods: {
@@ -151,57 +154,78 @@ export default defineComponent({
     },
 
     watchElementModel () {
-      // console.log('watchElementModel', this.$refs.model, this.data.cell.value)
-      // getBoundingClientRect
-      const targetFigure = this.storedFigures.find(i => i.cell.value === this.data.cell.value)
-      // console.log('targetFigure', targetFigure)
+      // console.log('this.data.targetCell.value', this.data.targetCell.value)
+      // console.log('this.storedFigures', this.storedFigures)
+      const targetFigure = this.storedFigures.find(i => {
+        // console.log('i.cell.value', i, i.cell.value)
+        return i.cell.value === this.data.targetCell.value
+      })
+      // console.log('targetFigure', targetFigure, targetFigure.id)
       if (!targetFigure) {
         return
       }
-      // console.log('this.data.cell.value', targetFigure.id)
       const targetEl = document.querySelector(`.figure-component[data-id="${targetFigure.id}"]`)
-      // console.log('targetEl', targetEl)
       if (!targetEl) {
         return
       }
-      // console.log('targetEl.__vueParentComponent', targetEl.__vueParentComponent.refs.model)
       const targetComponent = targetEl.__vueParentComponent
-      // console.log('targetModel', targetModel)
+      // console.log('targetComponent', targetComponent, targetComponent.props.data.id)
       this.watcher = setInterval(() => {
+        // console.log('targetComponent', targetComponent)
         this.detectModelsCrossing(targetComponent)
       }, 100)
     },
 
     unwatchElementModel () {
-      // console.log('unwatchElementModel', this.$refs.model)
+      // console.log('this.eaten.target', this.eaten.target)
       clearInterval(this.watcher)
       this.eaten.state = false
       this.eaten.target = null
-      this.$emitter.off('figure-finished-moving', this.onFigureFinishedMoving)
     },
 
     detectModelsCrossing (targetComponent) {
-      if (!targetComponent.refs.model) {
+      if (!targetComponent.refs.model || this.eaten.state) {
         return
       }
-      // console.log('[detectModelsCrossing]', targetComponent)
       const selfPosition = this.$refs.model.getBoundingClientRect()
-      // console.log('targetComponent', targetComponent)
       const targetPosition = targetComponent.refs.model.getBoundingClientRect()
-      // console.log('selfPosition', selfPosition)
-      const topLeftRange = [targetPosition.bottom, targetPosition.right]
-      // console.log('topLeftRange', selfPosition.top, topLeftRange)
-      if (selfPosition.top >= topLeftRange[0] && selfPosition.top <= topLeftRange[1]) {
-        // console.log('crossed!', this.eaten)
-        if (!this.eaten.state) {
-          // this.$store.dispatch('killFigure', targetComponent.props.data.id)
-          this.eaten.target = targetComponent.props.data.id
-          this.$store.dispatch('markFigureAsUnavailable', this.eaten.target)
+      // console.log('targetPosition', targetPosition)
+      // console.log('selfPosition.top', selfPosition.top, 'selfPosition.left', selfPosition.left)
 
-          this.$emitter.on('figure-finished-moving', this.onFigureFinishedMoving)
-          this.eaten.state = true
-        }
+      const targetSquare = this.getModelSquare(targetPosition)
+      const selfSquare = this.getModelSquare(selfPosition)
+      // console.log('targetSquare', targetSquare)
+      // console.log('selfSquare', selfSquare)
+
+      function fits (point) {
+        return (targetSquare[0].top <= point.top && point.top <= targetSquare[3].top) &&
+          (targetSquare[3].left <= point.left && point.left <= targetSquare[2].left)
       }
+
+      const isTopLeftCrossing = fits(selfSquare[0])
+      const isTopRightCrossing = fits(selfSquare[1])
+      const isBottomRightCrossing = fits(selfSquare[2])
+      const isBottomLeftCrossing = fits(selfSquare[3])
+
+      const isCrossing = isTopLeftCrossing || isTopRightCrossing || isBottomRightCrossing || isBottomLeftCrossing
+
+      // console.log('isCrossing', isCrossing, [isTopLeftCrossing, isTopRightCrossing, isBottomRightCrossing, isBottomLeftCrossing])
+
+      if (isCrossing) {
+        this.eaten.target = targetComponent.props.data.id
+        this.$store.dispatch('markFigureAsUnavailable', this.eaten.target)
+        this.eaten.state = true
+        // console.log('setting new eaten', this.data.id, this.eaten)
+      }
+    },
+
+    getModelSquare (position) {
+      return [
+        { top: position.top, left: position.left },
+        { top: position.top, left: position.left + position.width },
+        { top: position.top + position.height, left: position.left + position.width },
+        { top: position.top + position.height, left: position.left }
+      ]
     },
 
     onInit (): void {
@@ -216,9 +240,35 @@ export default defineComponent({
       })
     },
 
-    onFigureFinishedMoving () {
-      // console.log('[onFigureFinishedMoving]')
-      this.$store.dispatch('killFigure', this.eaten.target)
+    onFigureFinishedMoving (id) {
+      if (id !== this.data.id) {
+        return
+      }
+      console.log('[onFigureFinishedMoving]', id, this.eaten.state, this.eaten)
+      if (this.eaten.target) {
+        // const figureIdToKill = this.eaten.target
+        // console.log('this.eaten.target', this.eaten.target)
+        const targetFigure = this.$store.getters.figure({ id: this.eaten.target })
+        // console.log('targetFigure', targetFigure)
+        const targetCell = this.$store.getters.cell(targetFigure.cell.value)
+        // console.log('total cell', targetCell, targetCell.value)
+        this.$store.dispatch('updateFigure', {
+          query: { id: this.data.id },
+          data: { cell: targetCell }
+        })
+
+        this.$store.dispatch('killFigure', this.eaten.target)
+      } else {
+        // const cell = new Cell()
+        this.$store.dispatch('updateFigure', {
+          query: { id: this.data.id },
+          data: { cell: this.data.targetCell }
+        })
+      }
+
+      this.$nextTick(() => {
+        this.unwatchElementModel()
+      })
     },
 
     toggleMode (to?:FigureMode): void {
@@ -239,7 +289,6 @@ export default defineComponent({
             this.hideAvailableMoves()
           }
           if (this.mode === FigureMode.Moving) {
-            this.unwatchElementModel()
             this.$store.dispatch('game/setRollback', this.data.id)
           }
           break
@@ -258,14 +307,11 @@ export default defineComponent({
 
     showAvailableMoves (): void {
       const availableCells = this.$parent.getAvailableMoves()
-      // console.log('available cells:', availableCells)
       this.$store.dispatch('setHighlightedCells', availableCells)
-      // this.$emit('show-available-moves')
     },
 
     hideAvailableMoves (): void {
       this.$store.dispatch('setHighlightedCells', [])
-      // this.$emit('hide-available-moves')
     }
   }
 })
@@ -308,6 +354,20 @@ export default defineComponent({
       transition: $transition-rollback;
     }
 
+    .id {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      z-index: 4;
+      transform: translate(-50%, -50%);
+      color: white;
+      /*text-shadow: 1px 1px 1px black;*/
+      background: black;
+      line-height: 1;
+      font-size: .6rem;
+      font-weight: 600;
+    }
+
     .slot {
       position: relative;
       z-index: 2;
@@ -319,7 +379,8 @@ export default defineComponent({
     }
 
     &.-unavailable {
-      background: red;
+      background: deeppink;
+      pointer-events: none;
     }
 
     &.-mode {

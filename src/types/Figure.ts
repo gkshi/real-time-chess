@@ -1,5 +1,5 @@
 import config from '@/config'
-import { CellValue } from '@/types/Cell'
+import { Cell, CellValue } from '@/types/Cell'
 
 enum FigureColor {
   Dark = 'dark',
@@ -11,7 +11,9 @@ export interface Figure {
   name: string;
   alias?: string;
   color?: FigureColor;
-  cell?: CellValue;
+  cell?: Cell;
+  targetCell?: Cell;
+  key?: string;
 }
 
 export class Figure {
@@ -20,7 +22,9 @@ export class Figure {
     this.alias = props.alias
     this.name = config.figures.find(i => i.alias === props.alias).name
     this.color = props.color
-    this.cell = props.cell
+    this.cell = new Cell(props.cell)
+    this.targetCell = new Cell(props.cell)
+    this.key = Math.random().toString().slice(2, 9)
 
     this.init()
   }

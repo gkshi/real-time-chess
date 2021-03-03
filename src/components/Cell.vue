@@ -1,10 +1,12 @@
 <template lang="pug">
 .cell-component.flex.center(:class="classList" @click="onClick")
+  // .figure-id() {{ figureId }}
 </template>
 
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import { Cell } from '@/types/Cell'
+import { Figure } from '@/types/Figure'
 
 export default defineComponent({
   name: 'CellComponent',
@@ -27,7 +29,24 @@ export default defineComponent({
     isHighlighted (): boolean {
       return this.$store.state.highlightedCells.includes(this.data.value)
     }
+
+    // figure (): Figure {
+    //   return this.$store.state.figures.find(i => i.cell.value === this.data.value)
+    // },
+
+    // figureId () {
+    //   return this.figure?.id || null
+    // }
   },
+
+  // watch: {
+  //   figure: {
+  //     handler () {
+  //       console.log('cell', this.data.id, 'figure', this.figure)
+  //     },
+  //     deep: true
+  //   }
+  // },
 
   methods: {
     onClick () {
@@ -45,6 +64,17 @@ export default defineComponent({
     width: 12.5%;
     cursor: default;
     user-select: none;
+
+    .figure-id {
+      position: absolute;
+      z-index: 3;
+      font-size: .45rem;
+      font-weight: 500;
+      line-height: 1;
+      transform: translate(180%, 240%);
+      color: black;
+      background: white;
+    }
 
     &.-color {
       &-white {

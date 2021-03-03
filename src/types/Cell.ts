@@ -16,6 +16,9 @@ export class Cell {
     if (typeof props === 'string') {
       props = { value: props }
     }
+    if (!props) {
+      props = {}
+    }
 
     this.id = props.id
     this.value = props.value

@@ -78,8 +78,8 @@ export default createStore({
     },
 
     killFigure ({ commit, state }, id) {
-      console.log('[killFigure]', id)
-      // commit('FIGURES_UPDATE', state.figures.filter(i => i.id !== id))
+      console.log('[store][killFigure]', id)
+      commit('FIGURES_UPDATE', state.figures.filter(i => i.id !== id))
     },
 
     _cellColor ({ state }, i: number): CellColor {
@@ -149,7 +149,10 @@ export default createStore({
     figuresByColor: state => color => state.figures.filter(i => i.color === color),
 
     findByQuery: state => (target, query) => {
-      // console.log('[getters/findByQuery] target', target, 'query', query)
+      const logs = target === 'figures'
+      if (logs) {
+        console.log('[getters/findByQuery] target', target, 'query', query)
+      }
       const res = state[target].find(item => {
         let foundOption = 0
         Object.keys(query).forEach(key => {
@@ -175,9 +178,7 @@ export default createStore({
       return res
     },
 
-    figure: (state, getters) => query => {
-      return getters.findByQuery('figures', query)
-    },
+    figure: (state, getters) => query => getters.findByQuery('figures', query),
 
     cell: (state, getters) => query => {
       // console.log('[getters/cell] query', query)

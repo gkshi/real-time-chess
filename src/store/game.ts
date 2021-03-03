@@ -31,14 +31,11 @@ export default {
       // Меняем ячейку у выбранной фигуры
       dispatch('updateFigure', {
         query: { id: rootState.activeFigure.id },
-        data: { cell }
+        data: { targetCell: cell }
       }, { root: true })
 
       // Убирем подсвеченные ячейки
       dispatch('removeFromHighlightedCells', cell.value, { root: true })
-
-      // Задаем откат фигуре
-      // dispatch('setRollback', rootState.activeFigure.id)
     },
 
     setRollback ({ commit }, figureId) {

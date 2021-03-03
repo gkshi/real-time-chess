@@ -1,10 +1,10 @@
 <template lang="pug">
 .figures-component(@click="onClick")
   component(
-    v-for="(figure, i) in figures"
+    v-for="figure in figures"
     :is="`figure-${figure.alias}`"
     :data="figure"
-    :key="`${figure.id}-${i}`")
+    :key="figure.key")
 </template>
 
 <script lang="ts">
