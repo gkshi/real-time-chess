@@ -1,7 +1,8 @@
 import { Cell, CellValue } from '@/types/Cell'
-import { EnemyBlocking, DirectionName, Direction } from '@/types/Game'
+import { EnemyBlocking, DirectionName, Direction, Directions } from '@/types/Game'
 import config from '@/config'
 import { Figure } from '@/types/Figure'
+import { createLogger } from 'vuex'
 
 enum NextCellMode {
   Lower = 'lower',
@@ -54,8 +55,7 @@ const helpers = (app, options) => ({
     return number + 1 <= config.deckCols.length ? number + 1 : null
   },
 
-  _getNextCell (direction: Direction, startCellValue: CellValue) {
-    // console.log('[_getNextCell]', direction, startCellValue)
+  _getNextCell (direction: Direction, startCellValue: CellValue): CellValue {
     if (!startCellValue) {
       return null
     }
@@ -134,6 +134,7 @@ const helpers = (app, options) => ({
   _validateCellLine (moves, gameFigures) {
     const res = []
     moves.every(move => {
+      // Простая проверка на нахождение фигуры в ячейке
       const figure = gameFigures.filter(i => i.cell.value === move)
       res.push(move)
       return !figure.length
@@ -197,13 +198,36 @@ const helpers = (app, options) => ({
   },
 
   getAvailableMoves ({ directions, currentCellValue, gameFigures }) {
+    if (!gameFigures) {
+      console.warn('[helpers][getAvailableMoves] no gameFigures provided')
+    }
     let res = []
-    Object.values(directions).forEach((dir: Direction) => {
-      let moves = this.getDirectionMoves(dir, currentCellValue, gameFigures)
-      moves = this._validateCellLine(moves, gameFigures)
-      res = [...res, ...moves]
-    })
-    return res
+
+    if (Array.isArray(directions)) {
+      // Собираем ячейки подряд (по направлениям)
+      Object.values(directions).forEach((dir: Direction) => {
+        let moves = this.getDirectionMoves(dir, currentCellValue, gameFigures)
+        moves = this._validateCellLine(moves, gameFigures)
+        res = [...res, ...moves]
+      })
+    } else {
+      // Собираем конкретные ячейки (по шагам)
+      directions.values.forEach(coordinate => {
+        let cell = currentCellValue
+        coordinate.forEach(step => {
+          const direction = Object.keys(step)[0]
+          const amount = step[direction]
+          for (let i = 0; i < amount; i++) {
+            cell = this._getNextCell({ name: direction }, cell)
+          }
+        })
+        if (cell) {
+          res.push(cell)
+        }
+      })
+    }
+
+    return Array.from(new Set(res))
   }
 })
 

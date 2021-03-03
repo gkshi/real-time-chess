@@ -32,15 +32,6 @@ export default defineComponent({
     letters (): string[] {
       return this.$store.state._generator.cols
     }
-  },
-
-  watch: {
-    desk: {
-      handler () {
-        // console.log('<< desk changed')
-      },
-      deep: true
-    }
   }
 })
 </script>

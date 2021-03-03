@@ -21,6 +21,11 @@ export interface DirectionRule {
 }
 
 export interface Direction {
-  name?: DirectionName,
+  name: DirectionName,
   rules?: DirectionRule
+}
+
+export interface Directions {
+  values?: any,
+  commonRules?: DirectionRule
 }

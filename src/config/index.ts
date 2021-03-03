@@ -1,6 +1,8 @@
 import { Figure } from '@/types/Figure'
 
 import { defaultPosition } from '@/config/positions/default'
+import { flowerWhitePosition } from '@/config/positions/flower-white'
+import { flowerDarkPosition } from '@/config/positions/flower-dark'
 
 export default {
   rollbackTime: 1000 as number, // время отката в ms
@@ -8,6 +10,7 @@ export default {
   deckCols: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] as string[],
 
   deck: defaultPosition(),
+  // deck: flowerDarkPosition(),
 
   figures: [
     {

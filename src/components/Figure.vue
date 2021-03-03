@@ -154,13 +154,9 @@ export default defineComponent({
     },
 
     watchElementModel () {
-      // console.log('this.data.targetCell.value', this.data.targetCell.value)
-      // console.log('this.storedFigures', this.storedFigures)
       const targetFigure = this.storedFigures.find(i => {
-        // console.log('i.cell.value', i, i.cell.value)
         return i.cell.value === this.data.targetCell.value
       })
-      // console.log('targetFigure', targetFigure, targetFigure.id)
       if (!targetFigure) {
         return
       }
@@ -169,15 +165,12 @@ export default defineComponent({
         return
       }
       const targetComponent = targetEl.__vueParentComponent
-      // console.log('targetComponent', targetComponent, targetComponent.props.data.id)
       this.watcher = setInterval(() => {
-        // console.log('targetComponent', targetComponent)
         this.detectModelsCrossing(targetComponent)
       }, 100)
     },
 
     unwatchElementModel () {
-      // console.log('this.eaten.target', this.eaten.target)
       clearInterval(this.watcher)
       this.eaten.state = false
       this.eaten.target = null
@@ -189,13 +182,9 @@ export default defineComponent({
       }
       const selfPosition = this.$refs.model.getBoundingClientRect()
       const targetPosition = targetComponent.refs.model.getBoundingClientRect()
-      // console.log('targetPosition', targetPosition)
-      // console.log('selfPosition.top', selfPosition.top, 'selfPosition.left', selfPosition.left)
 
       const targetSquare = this.getModelSquare(targetPosition)
       const selfSquare = this.getModelSquare(selfPosition)
-      // console.log('targetSquare', targetSquare)
-      // console.log('selfSquare', selfSquare)
 
       function fits (point) {
         return (targetSquare[0].top <= point.top && point.top <= targetSquare[3].top) &&
@@ -209,13 +198,10 @@ export default defineComponent({
 
       const isCrossing = isTopLeftCrossing || isTopRightCrossing || isBottomRightCrossing || isBottomLeftCrossing
 
-      // console.log('isCrossing', isCrossing, [isTopLeftCrossing, isTopRightCrossing, isBottomRightCrossing, isBottomLeftCrossing])
-
       if (isCrossing) {
         this.eaten.target = targetComponent.props.data.id
         this.$store.dispatch('markFigureAsUnavailable', this.eaten.target)
         this.eaten.state = true
-        // console.log('setting new eaten', this.data.id, this.eaten)
       }
     },
 
@@ -246,12 +232,8 @@ export default defineComponent({
       }
       console.log('[onFigureFinishedMoving]', id, this.eaten.state, this.eaten)
       if (this.eaten.target) {
-        // const figureIdToKill = this.eaten.target
-        // console.log('this.eaten.target', this.eaten.target)
         const targetFigure = this.$store.getters.figure({ id: this.eaten.target })
-        // console.log('targetFigure', targetFigure)
         const targetCell = this.$store.getters.cell(targetFigure.cell.value)
-        // console.log('total cell', targetCell, targetCell.value)
         this.$store.dispatch('updateFigure', {
           query: { id: this.data.id },
           data: { cell: targetCell }
@@ -340,7 +322,7 @@ export default defineComponent({
       width: 50%;
       height: 50%;
       transform: translate(-50%, -50%);
-      background: rgba(red, .2);
+      background: rgba(red, .15);
     }
 
     .rollback {

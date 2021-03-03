@@ -1,4 +1,4 @@
-export const defaultPosition = () => ({
+export const flowerDarkPosition = () => ({
   A8: {
     figure: 'rook',
     color: 'dark'
@@ -129,10 +129,43 @@ export const defaultPosition = () => ({
     color: 'white'
   },
 
+  // custom
   E4: {
-    figure: 'knight',
+    figure: 'pawn',
+    color: 'dark'
+  },
+  D5: {
+    figure: 'pawn',
+    color: 'white'
+  },
+  E5: {
+    figure: 'pawn',
+    color: 'white'
+  },
+  F5: {
+    figure: 'pawn',
+    color: 'white'
+  },
+  F4: {
+    figure: 'pawn',
+    color: 'white'
+  },
+  F3: {
+    figure: 'pawn',
+    color: 'white'
+  },
+  E3: {
+    figure: 'pawn',
+    color: 'white'
+  },
+  D3: {
+    figure: 'pawn',
+    color: 'white'
+  },
+  D4: {
+    figure: 'pawn',
     color: 'white'
   }
 })
 
-export default defaultPosition()
+export default flowerDarkPosition()

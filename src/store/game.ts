@@ -24,9 +24,7 @@ export default {
 
     async makeMove ({ dispatch, commit, rootState, rootGetters }, payload) {
       console.log('[game/makeMove]', payload)
-      // console.log('activeFigure', rootState.activeFigure)
       const cell = await rootGetters.cell(payload.cell)
-      // console.log('rootGetters.cell', cell, 'payload.cell', payload.cell)
 
       // Меняем ячейку у выбранной фигуры
       dispatch('updateFigure', {

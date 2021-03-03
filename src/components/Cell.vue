@@ -39,15 +39,6 @@ export default defineComponent({
     // }
   },
 
-  // watch: {
-  //   figure: {
-  //     handler () {
-  //       console.log('cell', this.data.id, 'figure', this.figure)
-  //     },
-  //     deep: true
-  //   }
-  // },
-
   methods: {
     onClick () {
       // console.log('[cell][onClick]', this.data.value)

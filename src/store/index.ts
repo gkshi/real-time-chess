@@ -33,7 +33,6 @@ export default createStore({
     reset ({ commit, dispatch, state }) {
       commit('RESET')
       dispatch('init')
-      // console.log('state.reverse', state._generator.reverse)
     },
 
     async generateDesk ({ commit, dispatch, state }) {
@@ -58,7 +57,7 @@ export default createStore({
     },
 
     updateFigure ({ state, getters, commit }, payload) {
-      console.log('[store][updateFigure]', payload)
+      // console.log('[store][updateFigure]', payload)
       payload.figure = getters.figure(payload.query)
       payload.index = getters.findIndexByQuery('figures', payload.query)
       commit('FIGURE_UPDATE', payload)
@@ -69,7 +68,9 @@ export default createStore({
     },
 
     removeFromHighlightedCells ({ commit, state }, cell) {
-      const cells = state.highlightedCells.filter(i => i.value !== cell.value)
+      const cells = state.highlightedCells.filter(i => {
+        return i.value !== cell.value
+      })
       commit('HIGHLIGHTED_CELLS_UPDATE', cells)
     },
 
@@ -78,7 +79,7 @@ export default createStore({
     },
 
     killFigure ({ commit, state }, id) {
-      console.log('[store][killFigure]', id)
+      // console.log('[store][killFigure]', id)
       commit('FIGURES_UPDATE', state.figures.filter(i => i.id !== id))
     },
 
@@ -181,7 +182,6 @@ export default createStore({
     figure: (state, getters) => query => getters.findByQuery('figures', query),
 
     cell: (state, getters) => query => {
-      // console.log('[getters/cell] query', query)
       if (typeof query === 'string') {
         query = { value: query }
       }
