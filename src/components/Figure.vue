@@ -7,7 +7,7 @@
   @click="onClick")
   .model(ref="model")
   .rollback(v-show="inRollback" :style="`height:${rollbackPercent}%`")
-  .id {{ data.id }}
+  // .id {{ data.id }}
   .slot
     slot
 </template>
@@ -15,7 +15,6 @@
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import { Figure } from '@/types/Figure'
-import { Cell } from '@/types/Cell'
 import config from '@/config'
 
 enum FigureMode {
@@ -322,7 +321,7 @@ export default defineComponent({
       width: 50%;
       height: 50%;
       transform: translate(-50%, -50%);
-      background: rgba(red, .15);
+      // background: rgba(red, .15);
     }
 
     .rollback {
@@ -361,7 +360,7 @@ export default defineComponent({
     }
 
     &.-unavailable {
-      background: deeppink;
+      // background: deeppink;
       pointer-events: none;
     }
 

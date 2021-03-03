@@ -1,9 +1,10 @@
-<template>
-  <main>
-    <DeskComponent />
-    <FiguresComponent />
-    <MenuComponent />
-  </main>
+<template lang="pug">
+main
+  DeskComponent
+  FiguresComponent
+  MenuComponent
+
+  ModalGameFinished
 </template>
 
 <script lang="ts">
@@ -11,13 +12,15 @@ import { defineComponent } from 'vue'
 import DeskComponent from '@/components/Desk.vue'
 import FiguresComponent from '@/components/Figures.vue'
 import MenuComponent from '@/components/Menu.vue'
+import ModalGameFinished from '@/components/modals/GameFinished.vue'
 
 export default defineComponent({
   name: 'App',
   components: {
     DeskComponent,
     FiguresComponent,
-    MenuComponent
+    MenuComponent,
+    ModalGameFinished
   },
 
   mounted () {

@@ -29,7 +29,7 @@ export default defineComponent({
 
   methods: {
     getAvailableMoves (): CellValue[] {
-      const availableMoves = this.$helpers.getAvailableMoves({
+      return this.$helpers.getAvailableMoves({
         directions: [
           {
             name: 'top-left',
@@ -83,7 +83,6 @@ export default defineComponent({
         currentCellValue: this.data.cell.value,
         gameFigures: this.gameFigures
       })
-      return availableMoves
     }
   }
 })

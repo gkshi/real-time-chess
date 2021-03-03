@@ -163,19 +163,13 @@ const helpers = (app, options) => ({
     }
     rules = { ...defaultRules, ...rules }
 
-    console.log('rules', rules)
-
     // Проверяем правило length
     if ('length' in rules) {
       cells = cells.slice(0, rules.length)
     }
 
-    console.log('cells1', cells)
-
     // Проверяем ячейку на союзные фигуры
     cells = this._validateMovesByAlly(cells, startCellValue, gameFigures)
-
-    console.log('cells2', cells)
 
     // Проверяем правило enemyBlocking
     if ('enemyBlocking' in rules) {
@@ -193,8 +187,6 @@ const helpers = (app, options) => ({
       cells = res
     }
 
-    console.log('cells3', cells)
-
     // Проверяем правило enemyRequired
     if ('enemyRequired' in rules) {
       if (rules.enemyRequired) {
@@ -209,8 +201,6 @@ const helpers = (app, options) => ({
         cells = res
       }
     }
-
-    console.log('cells4', cells)
 
     return cells
   },

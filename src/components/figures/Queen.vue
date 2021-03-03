@@ -8,6 +8,7 @@ import { defineComponent, PropType } from 'vue'
 import { Figure } from '@/types/Figure'
 
 import FigureComponent from '@/components/Figure.vue'
+import { CellValue } from '@/types/Cell'
 
 export default defineComponent({
   name: 'FigureQueenComponent',
@@ -18,6 +19,47 @@ export default defineComponent({
 
   props: {
     data: Object as PropType<Figure>
+  },
+
+  computed: {
+    gameFigures (): Figure[] {
+      return this.$store.state.figures
+    }
+  },
+
+  methods: {
+    getAvailableMoves (): CellValue[] {
+      return this.$helpers.getAvailableMoves({
+        directions: [
+          {
+            name: 'top-left'
+          },
+          {
+            name: 'top'
+          },
+          {
+            name: 'top-right'
+          },
+          {
+            name: 'right'
+          },
+          {
+            name: 'bottom-right'
+          },
+          {
+            name: 'bottom'
+          },
+          {
+            name: 'bottom-left'
+          },
+          {
+            name: 'left'
+          }
+        ],
+        currentCellValue: this.data.cell.value,
+        gameFigures: this.gameFigures
+      })
+    }
   }
 })
 </script>

@@ -127,11 +127,6 @@ export const defaultPosition = () => ({
   H2: {
     figure: 'pawn',
     color: 'white'
-  },
-
-  E4: {
-    figure: 'queen',
-    color: 'white'
   }
 })
 

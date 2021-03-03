@@ -6,7 +6,8 @@ export default {
   state: {
     interval: null,
     timer: 0,
-    rollbacks: []
+    rollbacks: [],
+    winner: null
   },
 
   actions: {
@@ -14,6 +15,10 @@ export default {
       if (!getters.started) {
         commit('TIMEOUT_START')
       }
+    },
+
+    stop ({ state }) {
+      clearInterval(state.interval)
     },
 
     reset ({ commit, dispatch }) {
@@ -34,6 +39,21 @@ export default {
 
       // Убирем подсвеченные ячейки
       dispatch('removeFromHighlightedCells', cell.value, { root: true })
+    },
+
+    checkGameStatus ({ commit, dispatch, rootState }) {
+      console.log('[game][checkGameStatus]')
+      const whiteKing = rootState.figures.find(i => i.alias === 'king' && i.color === 'white')
+      const darkKing = rootState.figures.find(i => i.alias === 'king' && i.color === 'dark')
+
+      console.log('whiteKing', whiteKing)
+      console.log('darkKing', darkKing)
+
+      if (!whiteKing || !darkKing) {
+        dispatch('stop')
+        dispatch('modals/open', 'game_finished', { root: true })
+        commit('WINNER_UPDATE', whiteKing ? whiteKing.color : darkKing.color)
+      }
     },
 
     setRollback ({ commit }, figureId) {
@@ -59,6 +79,10 @@ export default {
       setTimeout(() => {
         state.rollbacks = state.rollbacks.filter(i => i !== figureId)
       }, config.rollbackTime)
+    },
+
+    WINNER_UPDATE (state, winner) {
+      state.winner = winner
     }
   },
 

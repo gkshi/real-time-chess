@@ -5,6 +5,7 @@ import { FigureConstructor } from '@/types/FigureConstructor'
 import config from '@/config'
 
 import gameModule from './game'
+import modalsModule from './modals'
 
 const initialState = () => ({
   desk: [] as Cell[],
@@ -78,9 +79,10 @@ export default createStore({
       commit('UNAVAILABLE_FIGURES_ADD', id)
     },
 
-    killFigure ({ commit, state }, id) {
+    killFigure ({ dispatch, commit, state }, id) {
       // console.log('[store][killFigure]', id)
       commit('FIGURES_UPDATE', state.figures.filter(i => i.id !== id))
+      dispatch('game/checkGameStatus', {}, { root: true })
     },
 
     _cellColor ({ state }, i: number): CellColor {
@@ -150,10 +152,6 @@ export default createStore({
     figuresByColor: state => color => state.figures.filter(i => i.color === color),
 
     findByQuery: state => (target, query) => {
-      const logs = target === 'figures'
-      if (logs) {
-        console.log('[getters/findByQuery] target', target, 'query', query)
-      }
       const res = state[target].find(item => {
         let foundOption = 0
         Object.keys(query).forEach(key => {
@@ -163,6 +161,7 @@ export default createStore({
         })
         return foundOption === Object.keys(query).length ? item : null
       })
+      // console.log('[findByQuery]', res)
       return res
     },
 
@@ -240,7 +239,8 @@ export default createStore({
   },
 
   modules: {
-    game: gameModule
+    game: gameModule,
+    modals: modalsModule
   },
 
   plugins: []

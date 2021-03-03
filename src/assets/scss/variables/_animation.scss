@@ -5,3 +5,5 @@ $transition-default-function: ease;
 $transition-default: all $transition-default-time $transition-default-function;
 $transition-figure: transform 2s linear, background $transition-default-time $transition-default-function;
 $transition-rollback: height 1s linear;
+
+$transition-modal: $transition-default;
