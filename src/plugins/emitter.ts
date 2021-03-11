@@ -1,6 +1,3 @@
-// import mitt from 'mitt'
-// var Emitter = require('tiny-emitter');
-// var emitter = new Emitter();
 import emitter from 'tiny-emitter/instance'
 
 const Emitter = options => ({
@@ -13,8 +10,6 @@ const Emitter = options => ({
 export default {
   install: (app, options) => {
     app.config.globalProperties.$emitter = Emitter(options)
-    // app.provide('emitter', options)
-
     app.provide('emitter', options)
   }
 }

@@ -1,9 +1,9 @@
 import config from '@/config'
-import { Cell, CellValue } from '@/types/Cell'
+import { Cell } from '@/types/Cell'
 
-enum FigureColor {
-  Dark = 'dark',
-  White = 'white'
+export enum FigureColor {
+  dark = 'dark',
+  white = 'white'
 }
 
 export interface Figure {
@@ -25,15 +25,5 @@ export class Figure {
     this.cell = new Cell(props.cell)
     this.targetCell = new Cell(props.cell)
     this.key = Math.random().toString().slice(2, 9)
-
-    this.init()
-  }
-
-  init () {
-    this.addListeners()
-  }
-
-  private addListeners () {
-
   }
 }

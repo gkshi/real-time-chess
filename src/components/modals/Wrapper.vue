@@ -3,8 +3,8 @@ transition
   .modal-component(v-if="show" @click.self="close")
     .modal-scroll-parent(@click.self="close")
       dialog(:open="show" :class="classList")
-        // .close.flex.center(@click="close")
-          icon-cross
+        .close.flex.center(v-if="closable" @click="close")
+          IconCross
 
         .head(v-if="$slots.head")
           slot(name="head")
@@ -14,7 +14,8 @@ transition
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType } from 'vue'
+import { defineComponent } from 'vue'
+import IconCross from '@/components/icons/Cross.vue'
 
 enum Size {
   default = 'default'
@@ -27,10 +28,24 @@ enum Types {
 export default defineComponent({
   name: 'ModalComponent',
 
+  components: {
+    IconCross
+  },
+
   props: {
     id: String,
-    size: String as PropType<Size>,
-    type: String as PropType<Types>
+    size: {
+      type: String,
+      default: 'default'
+    },
+    type: {
+      type: String,
+      default: 'default'
+    },
+    closable: {
+      type: Boolean,
+      default: true
+    }
   },
 
   computed: {
@@ -73,11 +88,13 @@ export default defineComponent({
 
   methods: {
     open (): void {
-      this.$modals.open(this.id)
+      this.$store.dispatch('modals/open', this.id)
     },
 
     close (): void {
-      this.$modals.close(this.id)
+      if (this.closable) {
+        this.$store.dispatch('modals/close', this.id)
+      }
     },
 
     onKeyup (e: KeyboardEvent): void {
@@ -113,6 +130,24 @@ export default defineComponent({
       max-height: 100%;
     }
 
+    .close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      cursor: pointer;
+      color: $color-text-light;
+      transition: $transition-default;
+
+      svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      &:hover {
+        color: $color-text-regular;
+      }
+    }
+
     dialog {
       position: relative;
       display: block;
@@ -128,8 +163,8 @@ export default defineComponent({
 
       &.modal-size {
         &-default {
-          width: 640px;
-          padding: 40px 100px 60px;
+          // width: 640px;
+          padding: 40px 60px 50px;
         }
       }
     }

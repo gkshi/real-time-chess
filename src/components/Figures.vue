@@ -41,7 +41,7 @@ export default defineComponent({
   },
 
   methods: {
-    onClick () {
+    onClick (): void {
       if (!this.isGameStarted) {
         this.$store.dispatch('game/start')
       }

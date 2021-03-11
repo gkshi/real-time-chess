@@ -4,7 +4,9 @@ main
   FiguresComponent
   MenuComponent
 
+  // модальные окна
   ModalGameFinished
+  ModalGameRules
 </template>
 
 <script lang="ts">
@@ -13,14 +15,18 @@ import DeskComponent from '@/components/Desk.vue'
 import FiguresComponent from '@/components/Figures.vue'
 import MenuComponent from '@/components/Menu.vue'
 import ModalGameFinished from '@/components/modals/GameFinished.vue'
+import ModalGameRules from '@/components/modals/GameRules.vue'
+import { createLogger } from 'vuex'
 
 export default defineComponent({
   name: 'App',
+
   components: {
     DeskComponent,
     FiguresComponent,
     MenuComponent,
-    ModalGameFinished
+    ModalGameFinished,
+    ModalGameRules
   },
 
   mounted () {
@@ -41,6 +47,7 @@ export default defineComponent({
     watchSize (): void {
       this.$nextTick(() => {
         const orientation = window.innerWidth < window.innerHeight ? 'vertical' : 'horizontal'
+        console.log('watch size', orientation)
         switch (orientation) {
           case 'horizontal':
             this.$el.style.width = `${this.$el.offsetHeight}px`

@@ -17,6 +17,12 @@ import { defineComponent, PropType } from 'vue'
 import { Figure } from '@/types/Figure'
 import config from '@/config'
 
+interface Coordinate {
+  top?: number;
+  left?: number;
+}
+type Square = Coordinate[]
+
 enum FigureMode {
   Default = 'default',
   ChoosingMove = 'choosing-move',
@@ -44,7 +50,7 @@ export default defineComponent({
   },
 
   computed: {
-    isAvailable () {
+    isAvailable (): boolean {
       return !this.$store.state.unavailableFigures.find(i => i === this.data.id)
     },
 
@@ -122,7 +128,7 @@ export default defineComponent({
   },
 
   methods: {
-    handleClick (id) {
+    handleClick (id): void {
       if (this.data.id !== id) {
         if (this.activeFigure?.id === this.data.id) {
           this.toggleMode(FigureMode.Default)
@@ -130,7 +136,7 @@ export default defineComponent({
       }
     },
 
-    startRollbackTimer () {
+    startRollbackTimer (): void {
       this.stopRollbackTimer()
       setTimeout(() => {
         this.rollbackTimer = 1000
@@ -140,12 +146,12 @@ export default defineComponent({
       }, 1000)
     },
 
-    stopRollbackTimer () {
+    stopRollbackTimer (): void {
       clearInterval(this.interval)
       this.rollbackTimer = 0
     },
 
-    getTransitionDuration () {
+    getTransitionDuration (): number {
       const css = (window as any).getComputedStyle(this.$el)
       const transitionProperties = css.transitionProperty.split(', ')
       const transitionDurations = css.transitionDuration.split(', ')
@@ -153,7 +159,7 @@ export default defineComponent({
       return value * 1000
     },
 
-    watchElementModel () {
+    watchElementModel (): void {
       const targetFigure = this.storedFigures.find(i => {
         return i.cell.value === this.data.targetCell.value
       })
@@ -164,27 +170,27 @@ export default defineComponent({
       if (!targetEl) {
         return
       }
-      const targetComponent = targetEl.__vueParentComponent
+      const targetComponent = (targetEl as any).__vueParentComponent
       this.watcher = setInterval(() => {
         this.detectModelsCrossing(targetComponent)
       }, 100)
     },
 
-    unwatchElementModel () {
+    unwatchElementModel (): void {
       clearInterval(this.watcher)
       this.eaten.state = false
       this.eaten.target = null
     },
 
-    detectModelsCrossing (targetComponent) {
+    detectModelsCrossing (targetComponent): void {
       if (!targetComponent.refs.model || this.eaten.state) {
         return
       }
       const selfPosition = this.$refs.model.getBoundingClientRect()
       const targetPosition = targetComponent.refs.model.getBoundingClientRect()
 
-      const targetSquare = this.getModelSquare(targetPosition)
-      const selfSquare = this.getModelSquare(selfPosition)
+      const targetSquare = this.getModelSquare(targetPosition) as Square
+      const selfSquare = this.getModelSquare(selfPosition) as Square
 
       function fits (point) {
         return (targetSquare[0].top <= point.top && point.top <= targetSquare[3].top) &&
@@ -205,7 +211,7 @@ export default defineComponent({
       }
     },
 
-    getModelSquare (position) {
+    getModelSquare (position): Square {
       return [
         { top: position.top, left: position.left },
         { top: position.top, left: position.left + position.width },
@@ -226,7 +232,7 @@ export default defineComponent({
       })
     },
 
-    onFigureFinishedMoving (id) {
+    onFigureFinishedMoving (id): void {
       if (id !== this.data.id) {
         return
       }

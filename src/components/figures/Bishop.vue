@@ -6,9 +6,8 @@ FigureComponent.figure-bishop-component(:data="data")
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import { Figure } from '@/types/Figure'
-
-import FigureComponent from '@/components/Figure.vue'
 import { CellValue } from '@/types/Cell'
+import FigureComponent from '@/components/Figure.vue'
 
 export default defineComponent({
   name: 'FigureBishopComponent',

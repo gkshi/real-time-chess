@@ -1,5 +1,5 @@
 <template lang="pug">
-ModalWrapper.game-finished-modal-component(:id="id")
+ModalWrapper.game-finished-modal-component(:id="id" :closable="false")
   div Game finished
 
   div
@@ -13,6 +13,7 @@ ModalWrapper.game-finished-modal-component(:id="id")
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import { FigureColor } from '@/types/Figure'
 import ModalWrapper from '@/components/modals/Wrapper.vue'
 
 export default defineComponent({
@@ -29,7 +30,7 @@ export default defineComponent({
   },
 
   computed: {
-    winner () {
+    winner (): FigureColor {
       return this.$store.state.game.winner
     }
   },

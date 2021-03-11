@@ -1,14 +1,18 @@
 <template lang="pug">
 .menu-component
   section
+    h1 Real-time chess
+
+  section
     div timer: {{ timer }}
-
-  section
-    button(@click="reset") Restart game
-
-  section
     div black figures: {{ blackFiguresAmount }}
     div white figures: {{ whiteFiguresAmount }}
+
+  section.buttons
+    div
+      button(@click="reset") Restart game
+    div
+      button(@click="showRules") Show game rules
 </template>
 
 <script lang="ts">
@@ -18,24 +22,28 @@ export default defineComponent({
   name: 'MenuComponent',
 
   computed: {
-    timer () {
+    timer (): string {
       const min = Math.floor(this.$store.state.game.timer / 60)
       const sec = this.$store.state.game.timer % 60
       return `${min.toString().length < 2 ? `0${min}` : min}:${sec.toString().length < 2 ? `0${sec}` : sec}`
     },
 
-    blackFiguresAmount () {
+    blackFiguresAmount (): number {
       return this.$store.getters.figuresByColor('dark').length
     },
 
-    whiteFiguresAmount () {
+    whiteFiguresAmount (): number {
       return this.$store.getters.figuresByColor('white').length
     }
   },
 
   methods: {
-    reset () {
+    reset (): void {
       this.$store.dispatch('game/reset')
+    },
+
+    showRules (): void {
+      this.$store.dispatch('modals/open', 'game_rules')
     }
   }
 })
@@ -51,6 +59,20 @@ export default defineComponent({
     section {
       &:not(:last-child) {
         margin-bottom: 20px;
+      }
+
+      &.rules {
+        background: darken($color-page-bg, 4%);
+      }
+
+      &.buttons {
+        margin-top: 40px;
+
+        & > * {
+          &:not(:last-child) {
+            margin-bottom: 8px;
+          }
+        }
       }
     }
   }

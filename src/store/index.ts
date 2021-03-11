@@ -1,7 +1,6 @@
 import { createStore } from 'vuex'
 import { Cell, CellColor, CellValue } from '@/types/Cell'
 import { Figure } from '@/types/Figure'
-import { FigureConstructor } from '@/types/FigureConstructor'
 import config from '@/config'
 
 import gameModule from './game'
@@ -98,7 +97,7 @@ export default createStore({
     _generateFigures ({ getters }): Figure[] {
       const figures = []
       Object.keys(config.deck).forEach((cell, i) => {
-        const figure = FigureConstructor[config.deck[cell].figure]({
+        const figure = new Figure({
           id: i + 1,
           alias: config.deck[cell].figure,
           color: config.deck[cell].color,

@@ -5,7 +5,7 @@ import { flowerWhitePosition } from '@/config/positions/flower-white'
 import { flowerDarkPosition } from '@/config/positions/flower-dark'
 
 export default {
-  rollbackTime: 10000 as number, // время отката в ms
+  rollbackTime: 5000 as number, // время отката в ms
 
   deckCols: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] as string[],
 
